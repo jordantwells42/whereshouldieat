@@ -7,13 +7,16 @@ import { stamenToner } from "pigeon-maps/providers";
 import debounce from "lodash.debounce";
 import { DebounceInput } from "react-debounce-input";
 
+type Result = any | null;
+type Results = Result[];
+
 function getDevicePixelRatio() {
   return window.devicePixelRatio || 1;
 }
 
 const Home: NextPage = () => {
   const [foodQuery, setFoodQuery] = useState("");
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<Results>([]);
   const [haveMoved, setHaveMoved] = useState(false);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
   const [zoom, setZoom] = useState(15);
@@ -45,7 +48,7 @@ const Home: NextPage = () => {
       })
       .then((res) => {
         console.log(res);
-        setResults(res.businesses.slice(0, 5));
+        setResults(res.businesses);
         setLocation([res.region.center.latitude, res.region.center.longitude]);
         setCenter([res.region.center.latitude, res.region.center.longitude]);
         setZoom(16);
@@ -96,6 +99,7 @@ const Home: NextPage = () => {
             metaWheelZoom={true}
             defaultCenter={[40.7812, -73.9665]}
             center={center}
+            //@ts-expect-error
             metaWheelZoomWarning={null}
             zoom={zoom}
             maxZoom={16}
@@ -111,7 +115,7 @@ const Home: NextPage = () => {
           </Map>
 
           <div className="absolute top-0 z-20 flex w-full flex-col items-center  justify-center text-lg ">
-            <div className="mt-20 flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-blue-800 p-4 lg:w-1/2">
+            <div className="mt-20 flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-stone-800 p-4 lg:w-1/2">
               <h2 className="w-5/6 text-white">
                 <b className="italic">Where</b> do you want to eat?
               </h2>
@@ -130,7 +134,7 @@ const Home: NextPage = () => {
         </div>
         {/*WHAT*/}
         <div className="flex h-screen w-full flex-col items-center justify-start border-2 bg-red-300 text-lg">
-          <div className="mt-20 flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-blue-800 p-4 lg:w-1/2">
+          <div className="mt-20 flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-stone-800 p-4 lg:w-1/2">
             <h2 className="w-5/6 text-white">
               <b className="italic">What</b> do you want to eat?
             </h2>
@@ -148,53 +152,58 @@ const Home: NextPage = () => {
         </div>
         {/*TINDER*/}
         <div className="z-1 h-screen w-full bg-red-300">
-          <div className="relative flex w-full flex-reverse-col items-center justify-center bg-white text-xl ">
+          <div className="flex-reverse-col relative flex w-full items-center justify-center bg-white ">
             {results &&
               results.map((datum: any, idx: number) => {
                 return (
                   <div
-                    style={{ top: Math.min(idx, results.length-1) * 10, zIndex: results.length + 1 - idx }}
-                    className="absolute flex aspect-[0.7143] w-96 flex-col items-center justify-start gap-4 rounded-2xl border-2 border-white bg-slate-900 p-2 text-white"
+                    style={{
+                      top: Math.min(idx, 3) * 10,
+                      zIndex: 3 + 1 - idx,
+                    }}
+                    className="absolute flex aspect-[0.7143] w-96 flex-col items-center justify-start gap-4 rounded-2xl border-2 border-white bg-stone-800 p-2 text-white"
                     key={datum.id}
                   >
                     <div className="relative flex w-full flex-col items-center justify-start ">
                       <img
-                        className="aspect-square w-full object-cover"
+                        className="aspect-square w-full rounded-2xl object-cover"
                         src={datum.image_url}
                         alt={datum.name}
                       />
-                      <div className="absolute bottom-0 right-0 h-3/4  w-full bg-gradient-to-t from-slate-900"></div>
-                      <div className="absolute bottom-0  right-0  text-left justify-start w-full flex flex-col">
-                        <p className="font-bold">{datum.name}</p>
-                        <p>
+                      <div className="absolute bottom-0 right-0 h-3/4  w-full rounded-2xl bg-gradient-to-t from-stone-900"></div>
+                      <div className="absolute bottom-0  right-0  flex w-full flex-col justify-start p-4 text-left">
+                        <p className="gap-2 align-middle">
+                          <b className="font-bold text-lg">{datum.name}</b>&nbsp;&nbsp;
+                          <i className="font-light">{datum.price}</i>
+                        </p>
+                        <p className=""> 
                           {Math.round((datum.distance / 1609) * 100) / 100}{" "}
                           miles away
-                        </p>
-                        <p>{datum.rating} Stars</p>
-                        <p>{datum.price}</p>
+                        </p >
+                        <p  className="">{datum.rating} Stars</p>
                       </div>
                     </div>
-                      <button
-                        className=""
-                        onClick={() =>
-                          setResults((p) => p.filter((e) => e.id !== datum.id))
-                        }
+                    <button
+                      className=""
+                      onClick={() =>
+                        setResults((p) => p.filter((e) => e.id !== datum.id))
+                      }
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-6 w-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 );
               })}
