@@ -7,7 +7,7 @@ import { stamenToner } from "pigeon-maps/providers";
 import debounce from "lodash.debounce";
 import { DebounceInput } from "react-debounce-input";
 
-function tiler(x:number,y:number,z:number, dpr?:number){
+function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
 }
 
@@ -19,12 +19,15 @@ function getDevicePixelRatio() {
 }
 
 const Home: NextPage = () => {
+
+  const maxZoom = 14
+
   const [foodQuery, setFoodQuery] = useState("");
   const [results, setResults] = useState<Results>([]);
   const [haveMoved, setHaveMoved] = useState(false);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
-  const [zoom, setZoom] = useState(15);
-  const [location, setLocation] = useState<[number, number]>([10, 10]);
+  const [zoom, setZoom] = useState(maxZoom);
+  const [location, setLocation] = useState<[number, number]>([40.7812, -73.9665]);
   const [locationQuery, setLocationQuery] = useState("");
   const [dprs, setDprs] = useState<number>(1);
 
@@ -37,6 +40,7 @@ const Home: NextPage = () => {
       });
     } else {
       setLocation([40.7812, -73.9665]);
+      setCenter([40.7812, -73.9665]);
       search("40.7812, -73.9665", foodQuery);
     }
   }, []);
@@ -55,7 +59,7 @@ const Home: NextPage = () => {
         setResults(res.businesses);
         setLocation([res.region.center.latitude, res.region.center.longitude]);
         setCenter([res.region.center.latitude, res.region.center.longitude]);
-        setZoom(16);
+        setZoom(maxZoom);
       })
       .catch((err) => {
         console.log(err);
@@ -84,7 +88,7 @@ const Home: NextPage = () => {
     setCenter(anchor);
     //setLocation(anchor)
     setHaveMoved(true);
-    setZoom(14);
+    setZoom(maxZoom);
   }
 
   return (
@@ -97,7 +101,7 @@ const Home: NextPage = () => {
 
       <div className="flex h-full w-full flex-col items-center justify-center border-2 border-black">
         {/*WHERE*/}
-        <div className="z-1 relative h-screen w-full">
+        <div className="z-1 relative h-screen w-full flex items-center justify-center">
           <Map
             provider={tiler}
             metaWheelZoom={true}
@@ -105,9 +109,11 @@ const Home: NextPage = () => {
             center={center}
             //@ts-expect-error
             metaWheelZoomWarning={null}
-            maxZoom={14}
+            zoom={zoom}
+            maxZoom={maxZoom+3}
             onClick={handleSelectLocation}
             onBoundsChanged={({ center, zoom }) => {
+              setZoom(zoom)
               setCenter(center);
               setHaveMoved(true);
             }}
@@ -116,7 +122,7 @@ const Home: NextPage = () => {
             <Marker width={50} anchor={location} onClick={handleMarkerClick} />
           </Map>
 
-          <div className="absolute top-0 z-20 flex w-full flex-col items-center  justify-center text-lg ">
+          <div className="absolute top-0 z-10 flex w-5/6 flex-col items-center  justify-center text-lg ">
             <div className="mt-20 flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-stone-800 p-4 lg:w-1/2">
               <h2 className="w-5/6 text-white">
                 <b className="italic">Where</b> do you want to eat?
@@ -175,14 +181,15 @@ const Home: NextPage = () => {
                       <div className="absolute bottom-0 right-0 h-3/4  w-full rounded-2xl bg-gradient-to-t from-stone-900"></div>
                       <div className="absolute bottom-0  right-0  flex w-full flex-col justify-start p-4 text-left">
                         <p className="gap-2 align-middle">
-                          <b className="font-bold text-lg">{datum.name}</b>&nbsp;&nbsp;
+                          <b className="text-lg font-bold">{datum.name}</b>
+                          &nbsp;&nbsp;
                           <i className="font-light">{datum.price}</i>
                         </p>
-                        <p className=""> 
+                        <p className="">
                           {Math.round((datum.distance / 1609) * 100) / 100}{" "}
                           miles away
-                        </p >
-                        <p  className="">{datum.rating} Stars</p>
+                        </p>
+                        <p className="">{datum.rating} Stars</p>
                       </div>
                     </div>
                     <button
