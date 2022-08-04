@@ -101,7 +101,25 @@ const Home: NextPage = () => {
 
       <div className="flex h-full w-full flex-col items-center justify-center border-2 border-black">
         {/*WHERE*/}
-        <div className="z-1 relative h-screen w-full flex items-center justify-center">
+        <div className="z-1 relative min-h-screen w-full flex flex-col items-center justify-center">
+        <div className="mt-20 flex w-5/6 flex-col items-center  justify-center text-lg ">
+            <div className="flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-stone-800 p-4 lg:w-1/2">
+              <h2 className="w-5/6 text-white">
+                <b className="italic">Where</b> do you want to eat?
+              </h2>
+              <DebounceInput
+                className="w-5/6 rounded-2xl border-2 border-black p-2"
+                value={locationQuery}
+                placeholder="Downtown Austin"
+                debounceTimeout={200}
+                onChange={(e) => [
+                  setLocationQuery(e.target.value),
+                  search(e.target.value, foodQuery),
+                ]}
+              />
+            </div>
+          </div>
+          <div className="w-5/6 h-1/2 lg:md-1/2">
           <Map
             provider={tiler}
             metaWheelZoom={true}
@@ -121,24 +139,8 @@ const Home: NextPage = () => {
             <ZoomControl />
             <Marker width={50} anchor={location} onClick={handleMarkerClick} />
           </Map>
-
-          <div className="absolute top-0 z-10 flex w-5/6 flex-col items-center  justify-center text-lg ">
-            <div className="mt-20 flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-stone-800 p-4 lg:w-1/2">
-              <h2 className="w-5/6 text-white">
-                <b className="italic">Where</b> do you want to eat?
-              </h2>
-              <DebounceInput
-                className="w-5/6 rounded-2xl border-2 border-black p-2"
-                value={locationQuery}
-                placeholder="Downtown Austin"
-                debounceTimeout={200}
-                onChange={(e) => [
-                  setLocationQuery(e.target.value),
-                  search(e.target.value, foodQuery),
-                ]}
-              />
-            </div>
           </div>
+
         </div>
         {/*WHAT*/}
         <div className="flex h-screen w-full flex-col items-center justify-start border-2 bg-red-300 text-lg">
