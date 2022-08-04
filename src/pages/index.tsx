@@ -7,6 +7,10 @@ import { stamenToner } from "pigeon-maps/providers";
 import debounce from "lodash.debounce";
 import { DebounceInput } from "react-debounce-input";
 
+function tiler(x:number,y:number,z:number, dpr?:number){
+  return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
+}
+
 type Result = any | null;
 type Results = Result[];
 
@@ -95,7 +99,7 @@ const Home: NextPage = () => {
         {/*WHERE*/}
         <div className="z-1 relative h-screen w-full">
           <Map
-            //provider={stamenToner}
+            provider={tiler}
             metaWheelZoom={true}
             defaultCenter={[40.7812, -73.9665]}
             center={center}
