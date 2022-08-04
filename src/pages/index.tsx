@@ -101,13 +101,11 @@ const Home: NextPage = () => {
             center={center}
             //@ts-expect-error
             metaWheelZoomWarning={null}
-            zoom={zoom}
-            maxZoom={16}
+            maxZoom={14}
             onClick={handleSelectLocation}
             onBoundsChanged={({ center, zoom }) => {
               setCenter(center);
               setHaveMoved(true);
-              setZoom(zoom);
             }}
           >
             <ZoomControl />
