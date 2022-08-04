@@ -22,6 +22,8 @@ const Home: NextPage = () => {
 
   const maxZoom = 14
 
+  const [toggle, setToggle] = useState(true)
+  const [tab, setTab]= useState(0)
   const [foodQuery, setFoodQuery] = useState("");
   const [results, setResults] = useState<Results>([]);
   const [haveMoved, setHaveMoved] = useState(false);
@@ -99,9 +101,11 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="flex h-full w-full flex-col items-center justify-center border-2 border-black">
+      <div style={{opacity: toggle? 10: 100}} className="flex h-full w-full flex-col items-center justify-center border-2 border-black">
+        <div style={{display: toggle? "block": "none"}} className="relative w-full lg:w-1/2 h-screen lg:h-1/2">
         {/*WHERE*/}
-        <div className="z-1 relative min-h-screen w-full flex flex-col items-center justify-center">
+        {tab == 0 && 
+        <div className="absolute top-0 w-full h-full z-1 relative flex flex-col items-center justify-center">
         <div className="mt-20 flex w-5/6 flex-col items-center  justify-center text-lg ">
             <div className="flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-stone-800 p-4 lg:w-1/2">
               <h2 className="w-5/6 text-white">
@@ -140,10 +144,12 @@ const Home: NextPage = () => {
             <Marker width={50} anchor={location} onClick={handleMarkerClick} />
           </Map>
           </div>
-
+          <input value={tab} onChange={(e) => setTab(e.target.value)}></input>
         </div>
+        }
         {/*WHAT*/}
-        <div className="flex h-screen w-full flex-col items-center justify-start border-2 bg-red-300 text-lg">
+        {tab == 1 && 
+        <div className="absolute top-0 flex h-full w-full flex-col items-center justify-start border-2 bg-red-300 text-lg">
           <div className="mt-20 flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-stone-800 p-4 lg:w-1/2">
             <h2 className="w-5/6 text-white">
               <b className="italic">What</b> do you want to eat?
@@ -159,6 +165,8 @@ const Home: NextPage = () => {
               ]}
             />
           </div>
+          <input value={tab} onChange={(e) => setTab(e.target.value)}></input>
+        </div>}
         </div>
         {/*TINDER*/}
         <div className="z-1 h-screen w-full bg-red-300">
