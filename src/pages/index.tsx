@@ -165,7 +165,7 @@ const Home: NextPage = () => {
               ]}
             />
           </div>
-          <input value={tab} onChange={(e) => setTab(Number(e.target.value)t)}></input>
+          <input value={tab} onChange={(e) => setTab(Number(e.target.value))}></input>
         </div>}
         </div>
         {/*TINDER*/}
