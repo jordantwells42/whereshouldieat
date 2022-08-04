@@ -144,7 +144,7 @@ const Home: NextPage = () => {
             <Marker width={50} anchor={location} onClick={handleMarkerClick} />
           </Map>
           </div>
-          <input value={tab} onChange={(e) => setTab(e.target.value)}></input>
+          <input value={tab} onChange={(e) => setTab(Number(e.target.value))}></input>
         </div>
         }
         {/*WHAT*/}
@@ -165,7 +165,7 @@ const Home: NextPage = () => {
               ]}
             />
           </div>
-          <input value={tab} onChange={(e) => setTab(e.target.value)}></input>
+          <input value={tab} onChange={(e) => setTab(Number(e.target.value)t)}></input>
         </div>}
         </div>
         {/*TINDER*/}
