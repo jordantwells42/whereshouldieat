@@ -101,7 +101,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div style={{opacity: toggle? 10: 100}} className="flex h-full w-full flex-col items-center justify-center border-2 border-black">
+      <div style={{opacity: toggle? 10: 100}} className="flex h-screen w-full flex-col items-center justify-center border-2 border-black">
         <div style={{display: toggle? "block": "none"}} className="relative w-full lg:w-1/2 h-screen lg:h-1/2">
         {/*WHERE*/}
         {tab == 0 && 
