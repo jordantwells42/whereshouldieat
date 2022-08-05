@@ -1,17 +1,47 @@
 /* eslint-disable @next/next/no-img-element */
+import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState, useCallback } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { stamenToner } from "pigeon-maps/providers";
 import debounce from "lodash.debounce";
+import { motion } from "framer-motion";
 import { DebounceInput } from "react-debounce-input";
 import FoodIcons from "../components/FoodIcons";
 import StarRatings from "react-star-ratings";
 import Link from "next/link";
+import Swipeable from "../components/Swipeable";
+import { setMaxListeners } from "stream";
 
 function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
+}
+
+function useWindowSize() {
+  // Initialize state with undefined width/height so server and client renders match
+  // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
+  const [windowSize, setWindowSize] = useState({
+    width: 1080,
+    height: 720,
+  });
+  useEffect(() => {
+    // Handler to call on window resize
+    function handleResize() {
+      // Set window width/height to state
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+    // Call handler right away so state gets updated with initial window size
+    handleResize();
+    // Remove event listener on cleanup
+    return () => window.removeEventListener("resize", handleResize);
+  }, []); // Empty array ensures that effect is only run on mount
+  return windowSize;
 }
 
 type Result = any | null;
@@ -20,11 +50,18 @@ type Results = Result[];
 const Home: NextPage = () => {
   const maxZoom = 14;
 
+  const windowSize = useWindowSize();
+
+  const [prevX, setPrevX] = useState(0);
+  const [x, setX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [initX, setInitX] = useState(0);
+  const [rotation, setRotation] = useState(0);
   const [toggle, setToggle] = useState(true);
   const [tab, setTab] = useState(0);
   const [foodQuery, setFoodQuery] = useState("");
   const [results, setResults] = useState<Results>([]);
-  const [haveMoved, setHaveMoved] = useState(false);
+  const router = useRouter();
   const [firstLoad, setFirstLoad] = useState(true);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
   const [zoom, setZoom] = useState(maxZoom);
@@ -87,7 +124,6 @@ const Home: NextPage = () => {
   }) {
     setCenter(latLng);
     setLocation(latLng);
-    setHaveMoved(false);
   }
 
   function handleMarkerClick({
@@ -99,8 +135,18 @@ const Home: NextPage = () => {
   }) {
     setCenter(anchor);
     //setLocation(anchor)
-    setHaveMoved(true);
     setZoom(maxZoom);
+  }
+  function swipeLeft() {
+    setResults((p) => p.slice(1));
+  }
+
+  function swipeRight() {
+    router.push(
+      `https://www.google.com/maps/dir/${location.join(",")}/${
+        results[0].coordinates.latitude
+      },${results[0].coordinates.longitude}`
+    );
   }
 
   return (
@@ -117,7 +163,10 @@ const Home: NextPage = () => {
       >
         {/*TINDER*/}
         <div className="relative flex h-full w-full flex-col items-center justify-center">
-          <div className="flex h-screen w-full items-center justify-center ">
+          <div
+            style={{ height: windowSize.height }}
+            className="flex w-full items-center justify-center "
+          >
             {
               <Map
                 provider={tiler}
@@ -135,7 +184,6 @@ const Home: NextPage = () => {
                 onBoundsChanged={({ center, zoom }) => {
                   setZoom(zoom);
                   setCenter(center);
-                  setHaveMoved(true);
                 }}
               >
                 {results &&
@@ -156,18 +204,86 @@ const Home: NextPage = () => {
           {results && !toggle && results[0] ? (
             [results[0]].map((datum: any, idx: number) => {
               return (
-                <div
-                  className="z-20 -mt-80 flex h-full w-full flex-col items-center justify-start gap-4 rounded-2xl bg-stone-200 p-2 text-stone-900 lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-1/4"
+                <motion.div
+                  style={{
+                    marginTop:
+                      windowSize.width >= 1024 ? 0 : -windowSize.height / 2.2,
+                  }}
+                  className="z-20 flex h-full w-full flex-col items-center justify-start gap-4 rounded-2xl bg-stone-200 p-2 text-stone-900 md:w-1/2 lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-1/4"
                   key={datum.id}
+                  initial={{ rotate: 0, x: 0 }}
+                  animate={{ rotate: rotation, x: x }}
+                  draggable
+                  onTouchStart={(e: any) => {
+                    console.log(e);
+                    setInitX(e.touches[0].clientX);
+                  }}
+                  onTouchMove={(e: any) => {
+                    const ox = e.targetTouches[0].clientX - initX;
+                    if (Math.abs(ox - prevX) > 80) {
+                      return;
+                    }
+                    console.log(ox);
+                    const f = 3;
+                    setRotation(ox / (f * 10));
+                    setX(ox / f);
+                    setPrevX(ox);
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    setDragging(false);
+                    setRotation(0);
+
+                    const thresh = 80;
+                    console.log(x);
+                    if (x > thresh) {
+                      swipeRight();
+                    } else if (x < -thresh) {
+                      swipeLeft();
+                    }
+                    setX(0);
+                    setPrevX(0);
+                  }}
+                  onDragStart={(e: any) => {
+                    console.log(e);
+                    setInitX(e.clientX);
+                  }}
+                  onDrag={(e: any) => {
+                    e.preventDefault();
+                    const ox = e.clientX - initX;
+                    if (Math.abs(ox - prevX) > 80) {
+                      return;
+                    }
+                    console.log(ox);
+                    const f = 3;
+                    setRotation(ox / (f * 10));
+                    setX(ox / f);
+                    setPrevX(ox);
+                  }}
+                  onDragEnd={(e) => {
+                    e.preventDefault();
+                    setDragging(false);
+                    setRotation(0);
+
+                    const thresh = 80;
+                    console.log(x);
+                    if (x > thresh) {
+                      swipeRight();
+                    } else if (x < -thresh) {
+                      swipeLeft();
+                    }
+                    setX(0);
+                    setPrevX(0);
+                  }}
                 >
-                  <div className="relative m-4 flex w-5/6 flex-col items-center justify-start md:w-1/2 lg:w-full">
+                  <div className="relative m-4 flex w-full flex-col items-center justify-start">
                     <img
-                      className="aspect-square w-full rounded-2xl object-cover"
+                      className="aspect-square w-5/6 rounded-2xl object-cover"
                       src={datum.image_url}
                       alt={datum.name}
                     />
-                    <div className="absolute bottom-0 right-0 h-3/4  w-full rounded-2xl bg-gradient-to-t from-stone-900"></div>
-                    <div className="absolute bottom-0 right-0  flex  w-full flex-col justify-start p-4 text-left text-white">
+                    <div className="absolute bottom-0  flex h-3/4 w-5/6 items-center rounded-2xl bg-gradient-to-t from-stone-900"></div>
+                    <div className="absolute bottom-0  flex  w-5/6 flex-col justify-start p-4 text-left text-white">
                       <p className="gap-2 align-middle">
                         <b className="text-lg font-bold">{datum.name}</b>
                         &nbsp;&nbsp;
@@ -178,13 +294,14 @@ const Home: NextPage = () => {
                         away
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className="h-8 flex items-center justify-center gap-2 align-center">
+                        <p className="align-center flex h-8 items-center justify-center gap-2">
                           <StarRatings
-                          
                             rating={datum.rating}
                             starRatedColor="gold"
                             starEmptyColor="black"
-                            starDimension={"25px"}
+                            starDimension={`${
+                              windowSize.width > 700 ? "12" : "12"
+                            }px`}
                             numberOfStars={5}
                             name="rating"
                           />{" "}
@@ -202,7 +319,7 @@ const Home: NextPage = () => {
                     </div>
                   </div>
 
-                  <div className="w-full md:w-1/2 lg:w-full">
+                  <div className="w-5/6">
                     <p className="italic">
                       {datum.categories.map((c: any) => c.title).join(" | ")}
                     </p>
@@ -230,7 +347,7 @@ const Home: NextPage = () => {
                       />
                     </svg>
                   </button>
-                </div>
+                </motion.div>
               );
             })
           ) : (
@@ -272,7 +389,6 @@ const Home: NextPage = () => {
                   onBoundsChanged={({ center, zoom }) => {
                     setZoom(zoom);
                     setCenter(center);
-                    setHaveMoved(true);
                   }}
                 >
                   <ZoomControl />

@@ -30,9 +30,9 @@ export default function FoodIcons({
     "Dim Sum", 
   ];
   return (
-    <div className="w-full h-full grid grid-rows-2 gap-1 grid-flow-col overflow-x-scroll overflow-y-hidden pt-10 pl-4 ">
+    <div className="w-full h-full grid grid-rows-2  grid-flow-col overflow-x-scroll overflow-y-hidden pt-10 pl-4 ">
       {foods.map((food, index) => (
-        <div className="w-20 h-20 hover:cursor-pointer hover:bg-blue-200 hover:rounded-2xl p-1 flex flex-col items-center justify-center" key={index}>
+        <div className="w-20 h-20 hover:cursor-pointer hover:bg-blue-200 hover:rounded-2xl p-2 flex flex-col items-center justify-center" key={index}>
           <img
             src={`/${food}.svg`}
             alt={food}
