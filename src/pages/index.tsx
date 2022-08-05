@@ -213,7 +213,7 @@ const Home: NextPage = () => {
         >
           Change up your search
         </button>
-        <div style={{display: toggle? "block" : "none"}} className="h-full absolute bg-red-800 bg-opacity-50 w-full">
+        <div style={{display: toggle? "block" : "none"}} className="h-full absolute bg-stone-800 bg-opacity-50 w-full">
 
         </div>
         </div>
