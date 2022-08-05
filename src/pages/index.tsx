@@ -40,14 +40,13 @@ const Home: NextPage = () => {
       navigator.geolocation.getCurrentPosition((e) => {
         setLocation([e.coords.latitude, e.coords.longitude]);
         setCenter([e.coords.latitude, e.coords.longitude]);
-        search(`${e.coords.latitude}, ${e.coords.longitude}`, foodQuery);
+        search(`${e.coords.latitude}, ${e.coords.longitude}`, "");
       });
     } else {
       setLocation([40.7812, -73.9665]);
       setCenter([40.7812, -73.9665]);
-      search("40.7812, -73.9665", foodQuery);
-    }
-    search("40.7812, -73.9665", "food");
+      search("40.7812, -73.9665", "");
+   }
   }, []);
 
   useEffect(() => {
