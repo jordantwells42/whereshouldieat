@@ -173,8 +173,14 @@ const Home: NextPage = () => {
                           {Math.round((datum.distance / 1609) * 100) / 100}{" "}
                           miles away
                         </p>
-                        <p className="">{datum.rating} Stars</p>
+                        <p className="">{datum.rating} Stars ({datum.review_count})</p>
                       </div>
+                    </div>
+
+                    <div className="w-3/4">
+                    <p className="italic">{datum.categories.map(c => c.title).join(" | ")}</p>
+                    <p>{datum.display_phone}</p>
+                    <p>{datum.location.display_address.join("\n")}</p>
                     </div>
                     <button
                       className=""
@@ -197,7 +203,6 @@ const Home: NextPage = () => {
                         />
                       </svg>
                     </button>
-                    <p className="w-full h-30 flex-wrap">TEXT TEXT TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT </p>
                   </div>
                 )}) :           <button
                 className="-mt-40 z-20 h-20 w-full lg:mt-0 lg:absolute lg:w-1/4 lg:top-20 lg:left-20 my-10 rounded-2xl bg-stone-500 p-4 text-white flex items-center justify-center"

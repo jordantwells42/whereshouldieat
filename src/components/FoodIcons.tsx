@@ -8,19 +8,26 @@ export default function FoodIcons({
   const foods = [
     "Pizza",
     "Taco",
-    "Hamburger",
-    "Wrap",
     "Noodles",
-    "Pancake",
+    "Hamburger",
     "Hot Dog",
-    "Doughnut",
+    "Sushi",
+    "Spaghetti",
+    "Fish",
+    "Cafe",
+    "Cookies",
+    "Kebab",
+    "Pie",
+    "Quesadilla",
     "Steak",
+    "Pancake",
+    "Wrap",
+    "Doughnut",
     "French Fries",
     "Bacon",
     "Rice Bowl",
     "Vegan Food",
     "Dim Sum", 
-    "Coffee To Go"
   ];
   return (
     <div className="w-full h-full grid grid-rows-2 gap-1 grid-flow-col overflow-x-scroll overflow-y-hidden pt-10 pl-4 ">
