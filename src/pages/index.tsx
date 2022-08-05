@@ -178,13 +178,13 @@ const Home: NextPage = () => {
                         away
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className="h-8 flex items-center justify-center gap-2 align-center">
+                        <p className="h-8 flex items-center justify-center gap-1 md:gap-2 align-center">
                           <StarRatings
                           
                             rating={datum.rating}
                             starRatedColor="gold"
                             starEmptyColor="black"
-                            starDimension={"25px"}
+                            starDimension={"15px"}
                             numberOfStars={5}
                             name="rating"
                           />{" "}
