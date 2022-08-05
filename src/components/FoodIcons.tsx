@@ -1,7 +1,9 @@
 export default function FoodIcons({
   setFoodQuery,
+  setToggle,
 }: {
   setFoodQuery: (query: string) => void;
+  setToggle: (toggle: boolean) => void;
 }) {
   const foods = [
     "Pizza",
@@ -21,14 +23,14 @@ export default function FoodIcons({
     "Coffee To Go"
   ];
   return (
-    <div className="grid grid-rows-2 gap-4 grid-flow-col overflow-x-scroll overflow-y-hidden pt-4 pl-10 ">
+    <div className="w-full h-full grid grid-rows-2 gap-1 grid-flow-col overflow-x-scroll overflow-y-hidden pt-4 pl-4 ">
       {foods.map((food, index) => (
-        <div className="hover:cursor-pointer hover:bg-blue-200 hover:rounded-2xl p-1 w-20 aspect-square flex flex-col items-center justify-center" key={index}>
+        <div className="w-20 h-20 hover:cursor-pointer hover:bg-blue-200 hover:rounded-2xl p-1 flex flex-col items-center justify-center" key={index}>
           <img
             src={`/${food}.svg`}
             alt={food}
-            className="aspect-square w-20"
-            onClick={() => setFoodQuery(food)}
+            className="h-full aspect-square"
+            onClick={() => (setFoodQuery(food), setToggle(false))}
           />
           <p className="text-xs font-bold">{food}</p>
         </div>

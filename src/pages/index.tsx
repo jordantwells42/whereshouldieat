@@ -20,7 +20,7 @@ function getDevicePixelRatio() {
 }
 
 const Home: NextPage = () => {
-  const maxZoom = 14;
+  const maxZoom = 16;
 
   const [toggle, setToggle] = useState(true);
   const [tab, setTab] = useState(0);
@@ -49,6 +49,10 @@ const Home: NextPage = () => {
     }
     search("40.7812, -73.9665", "food");
   }, []);
+
+  useEffect(() => {
+    search(locationQuery, foodQuery)
+  }, [locationQuery, foodQuery])
 
   function search(locationStr: string, foodStr: string) {
     fetch(
@@ -106,24 +110,54 @@ const Home: NextPage = () => {
 
       <div
         style={{ backgroundBlendMode: toggle ? "darken" : "" }}
-        className="relative flex h-screen w-full flex-col items-center justify-center  bg-stone-200"
+        className="relative flex h-full w-full flex-col items-center justify-center  bg-stone-700"
       >
         {/*TINDER*/}
-        <div className="h-screen w-full ">
-          <div className="mt-10 flex-reverse-col relative flex w-full items-center justify-center bg-white ">
-            {results &&
-              !toggle &&
-              results.map((datum: any, idx: number) => {
+        <div className="relative h-full w-full flex items-center flex-col justify-center">
+          <div className="h-screen w-full flex items-center justify-center ">
+            <Map
+              provider={tiler}
+              defaultCenter={[40.7812, -73.9665]}
+              center={
+                results && results[0]
+                  ? [
+                      results[0].coordinates.latitude,
+                      results[0].coordinates.longitude,
+                    ]
+                  : center
+              }
+              zoom={zoom}
+              maxZoom={maxZoom + 3}
+              onClick={handleSelectLocation}
+              onBoundsChanged={({ center, zoom }) => {
+                setZoom(zoom);
+                setCenter(center);
+                setHaveMoved(true);
+              }}
+            >
+              {results &&
+                results.map((result) => (
+                  <Marker
+                    key={result.id}
+                    width={50}
+                    anchor={[
+                      result.coordinates.latitude,
+                      result.coordinates.longitude,
+                    ]}
+                    onClick={handleMarkerClick}
+                  />
+                ))}
+            </Map>
+          </div>
+          {(results &&
+              !toggle && results[0]) ? 
+              [results[0]].map((datum: any, idx: number) => {
                 return (
                   <div
-                    style={{
-                      top: Math.min(idx, 3) * 10,
-                      zIndex: 3 + 1 - idx,
-                    }}
-                    className="absolute flex aspect-[0.7143] w-96 flex-col items-center justify-start gap-4 rounded-2xl border-2 border-white bg-stone-800 p-2 text-white"
+                    className="flex h-full z-20 -mt-80 lg:mt-0 lg:h-screen w-full lg:absolute lg:w-1/4 lg:top-20 lg:left-20 flex-col items-center justify-start gap-4 rounded-2xl border-2 border-white bg-stone-800 p-2 text-white"
                     key={datum.id}
                   >
-                    <div className="relative flex w-full flex-col items-center justify-start ">
+                    <div className="relative flex w-5/6 md:w-1/2 lg:w-full flex-col items-center justify-start m-4">
                       <img
                         className="aspect-square w-full rounded-2xl object-cover"
                         src={datum.image_url}
@@ -164,12 +198,27 @@ const Home: NextPage = () => {
                         />
                       </svg>
                     </button>
+                    <p className="w-full h-30 flex-wrap">TEXT TEXT TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT </p>
                   </div>
-                );
-              })}
-          </div>
+                )}) :           <button
+                className="lg:absolute lg:w-1/4 lg:top-20 lg:left-20 my-10 h-10 rounded-2xl bg-stone-500 p-4 text-white flex items-center justify-center"
+                onClick={() => (setToggle(true), setTab(1))}
+              >
+                Try Again?
+              </button>
+              }
+
+          <button
+          className="my-10 h-10 rounded-2xl bg-stone-500 p-4 text-white flex items-center justify-center"
+          onClick={() => (setTab(1), setToggle(true)) }
+        >
+          Try Again?
+        </button>
+        <div style={{display: toggle? "block" : "none"}} className="h-full absolute bg-red-800 bg-opacity-50 w-full">
+
         </div>
-        <button className="p-4 bg-stone-500 text-white rounded-2xl mb-5" onClick={() => setToggle(true)}>Try Again?</button>
+        </div>
+        
         {/*MDOAL */}
         <div
           style={{ display: toggle ? "block" : "none" }}
@@ -181,10 +230,8 @@ const Home: NextPage = () => {
               <div className="h-1/2 w-full">
                 <Map
                   provider={tiler}
-
                   defaultCenter={[40.7812, -73.9665]}
                   center={center}
-
                   zoom={zoom}
                   maxZoom={maxZoom + 3}
                   onClick={handleSelectLocation}
@@ -202,7 +249,7 @@ const Home: NextPage = () => {
                   />
                 </Map>
               </div>
-              <div className="flex w-full flex-col items-center justify-center gap-4 p-4 py-8">
+              <div className="flex h-1/4 w-full flex-col items-center justify-center gap-4 p-4 py-8">
                 <h2 className="w-5/6 text-xl text-black">
                   <b className="italic">Where</b> do you want to eat?
                 </h2>
@@ -218,7 +265,7 @@ const Home: NextPage = () => {
                 />
               </div>
               <button
-                className="absolute bottom-5 right-5"
+                className="absolute bottom-5 right-5 h-1/4"
                 onClick={() => setTab((p) => p + 1)}
               >
                 <svg
@@ -242,8 +289,10 @@ const Home: NextPage = () => {
           {tab == 1 && (
             <div className="relative flex h-full w-full flex-col items-center justify-center">
               <div className="z-10 flex h-full w-full flex-col items-center justify-start text-lg">
-                <div className="w-full h-1/2"><FoodIcons setFoodQuery={setFoodQuery} /></div>
-                <div className="flex w-full flex-col items-center justify-center gap-4 p-4 py-8">
+                <div className="h-1/2 w-full">
+                  <FoodIcons setToggle={setToggle} setFoodQuery={setFoodQuery} />
+                </div>
+                <div className="flex h-1/4 w-full flex-col items-center justify-center gap-4 p-4 py-8">
                   <h2 className="w-5/6 text-xl text-black">
                     <b className="italic">What</b> do you want to eat?
                   </h2>
@@ -259,7 +308,7 @@ const Home: NextPage = () => {
                   />
                 </div>
                 <button
-                  className="absolute bottom-5 left-5"
+                  className="absolute bottom-5 left-5 h-1/4"
                   onClick={() => setTab(0)}
                 >
                   <svg
@@ -278,7 +327,7 @@ const Home: NextPage = () => {
                   </svg>
                 </button>
                 <button
-                  className="absolute bottom-5 right-5"
+                  className="absolute bottom-5 right-5 h-1/4"
                   onClick={() => (setTab(0), setToggle(false))}
                 >
                   <svg
