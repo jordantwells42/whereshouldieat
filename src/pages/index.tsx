@@ -6,6 +6,7 @@ import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { stamenToner } from "pigeon-maps/providers";
 import debounce from "lodash.debounce";
 import { DebounceInput } from "react-debounce-input";
+import FoodIcons from "../components/FoodIcons";
 
 function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
@@ -46,6 +47,7 @@ const Home: NextPage = () => {
       setCenter([40.7812, -73.9665]);
       search("40.7812, -73.9665", foodQuery);
     }
+    search("40.7812, -73.9665", "food");
   }, []);
 
   function search(locationStr: string, foodStr: string) {
@@ -108,7 +110,7 @@ const Home: NextPage = () => {
       >
         {/*TINDER*/}
         <div className="h-screen w-full ">
-          <div className="flex-reverse-col relative flex w-full items-center justify-center bg-white ">
+          <div className="mt-10 flex-reverse-col relative flex w-full items-center justify-center bg-white ">
             {results &&
               !toggle &&
               results.map((datum: any, idx: number) => {
@@ -167,7 +169,7 @@ const Home: NextPage = () => {
               })}
           </div>
         </div>
-        <button onClick={() => setToggle(true)}>Lmao</button>
+        <button className="p-4 bg-stone-500 text-white rounded-2xl mb-5" onClick={() => setToggle(true)}>Try Again?</button>
         {/*MDOAL */}
         <div
           style={{ display: toggle ? "block" : "none" }}
@@ -175,15 +177,14 @@ const Home: NextPage = () => {
         >
           {/*WHERE*/}
           {tab == 0 && (
-            <div className="relative flex h-full w-full flex-col items-center justify-start">
+            <div className="relative flex h-full w-full flex-col items-center justify-start text-lg">
               <div className="h-1/2 w-full">
                 <Map
                   provider={tiler}
-                  metaWheelZoom={true}
+
                   defaultCenter={[40.7812, -73.9665]}
                   center={center}
-                  //@ts-expect-error
-                  metaWheelZoomWarning={null}
+
                   zoom={zoom}
                   maxZoom={maxZoom + 3}
                   onClick={handleSelectLocation}
@@ -241,7 +242,7 @@ const Home: NextPage = () => {
           {tab == 1 && (
             <div className="relative flex h-full w-full flex-col items-center justify-center">
               <div className="z-10 flex h-full w-full flex-col items-center justify-start text-lg">
-                <div className="w-full h-1/2">lil food icons here</div>
+                <div className="w-full h-1/2"><FoodIcons setFoodQuery={setFoodQuery} /></div>
                 <div className="flex w-full flex-col items-center justify-center gap-4 p-4 py-8">
                   <h2 className="w-5/6 text-xl text-black">
                     <b className="italic">What</b> do you want to eat?
