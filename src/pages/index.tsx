@@ -7,6 +7,8 @@ import { stamenToner } from "pigeon-maps/providers";
 import debounce from "lodash.debounce";
 import { DebounceInput } from "react-debounce-input";
 import FoodIcons from "../components/FoodIcons";
+import StarRatings from "react-star-ratings";
+import Link from "next/link";
 
 function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
@@ -14,10 +16,6 @@ function tiler(x: number, y: number, z: number, dpr?: number) {
 
 type Result = any | null;
 type Results = Result[];
-
-function getDevicePixelRatio() {
-  return window.devicePixelRatio || 1;
-}
 
 const Home: NextPage = () => {
   const maxZoom = 14;
@@ -27,6 +25,7 @@ const Home: NextPage = () => {
   const [foodQuery, setFoodQuery] = useState("");
   const [results, setResults] = useState<Results>([]);
   const [haveMoved, setHaveMoved] = useState(false);
+  const [firstLoad, setFirstLoad] = useState(true);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
   const [zoom, setZoom] = useState(maxZoom);
   const [location, setLocation] = useState<[number, number]>([
@@ -36,22 +35,27 @@ const Home: NextPage = () => {
   const [dprs, setDprs] = useState<number>(1);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((e) => {
-        setLocation([e.coords.latitude, e.coords.longitude]);
-        setCenter([e.coords.latitude, e.coords.longitude]);
-        search(`${e.coords.latitude}, ${e.coords.longitude}`, "");
-      });
-    } else {
-      setLocation([40.7812, -73.9665]);
-      setCenter([40.7812, -73.9665]);
-      search("40.7812, -73.9665", "");
-   }
+    if (!locationQuery) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((e) => {
+          setLocation([e.coords.latitude, e.coords.longitude]);
+          setCenter([e.coords.latitude, e.coords.longitude]);
+          search(`${e.coords.latitude}, ${e.coords.longitude}`, "");
+        });
+      } else {
+        setLocation([40.7812, -73.9665]);
+        setCenter([40.7812, -73.9665]);
+        search("40.7812, -73.9665", "");
+      }
+    }
   }, []);
 
   useEffect(() => {
-    search(locationQuery, foodQuery)
-  }, [locationQuery, foodQuery])
+    if (!firstLoad) {
+      search(locationQuery, foodQuery);
+    }
+    setFirstLoad(false);
+  }, [locationQuery, foodQuery]);
 
   function search(locationStr: string, foodStr: string) {
     fetch(
@@ -112,117 +116,144 @@ const Home: NextPage = () => {
         className="relative flex h-full w-full flex-col items-center justify-center  bg-stone-700"
       >
         {/*TINDER*/}
-        <div className="relative h-full w-full flex items-center flex-col justify-center">
-          <div className="h-screen w-full flex items-center justify-center ">
-            <Map
-              provider={tiler}
-              defaultCenter={[40.7812, -73.9665]}
-              center={
-                results && results[0]
-                  ? [
-                      results[0].coordinates.latitude,
-                      results[0].coordinates.longitude,
-                    ]
-                  : center
-              }
-              zoom={zoom}
-              maxZoom={maxZoom + 3}
-              onClick={handleSelectLocation}
-              onBoundsChanged={({ center, zoom }) => {
-                setZoom(zoom);
-                setCenter(center);
-                setHaveMoved(true);
-              }}
-            >
-              {results &&
-                results.map((result) => (
-                  <Marker
-                    key={result.id}
-                    width={50}
-                    anchor={[
-                      result.coordinates.latitude,
-                      result.coordinates.longitude,
-                    ]}
-                    onClick={handleMarkerClick}
-                  />
-                ))}
-            </Map>
+        <div className="relative flex h-full w-full flex-col items-center justify-center">
+          <div className="flex h-screen w-full items-center justify-center ">
+            {
+              <Map
+                provider={tiler}
+                center={
+                  results && results[0]
+                    ? [
+                        results[0].coordinates.latitude,
+                        results[0].coordinates.longitude,
+                      ]
+                    : center
+                }
+                zoom={zoom}
+                maxZoom={maxZoom + 3}
+                onClick={handleSelectLocation}
+                onBoundsChanged={({ center, zoom }) => {
+                  setZoom(zoom);
+                  setCenter(center);
+                  setHaveMoved(true);
+                }}
+              >
+                {results &&
+                  results.map((result) => (
+                    <Marker
+                      key={result.id}
+                      width={50}
+                      anchor={[
+                        result.coordinates.latitude,
+                        result.coordinates.longitude,
+                      ]}
+                      onClick={handleMarkerClick}
+                    />
+                  ))}
+              </Map>
+            }
           </div>
-          {(results &&
-              !toggle && results[0]) ? 
-              [results[0]].map((datum: any, idx: number) => {
-                return (
-                  <div
-                    className="flex h-full z-20 -mt-80 lg:mt-0 lg:h-screen w-full lg:absolute lg:w-1/4 lg:top-20 lg:left-20 flex-col items-center justify-start gap-4 rounded-2xl border-2 border-white bg-stone-800 p-2 text-white"
-                    key={datum.id}
-                  >
-                    <div className="relative flex w-5/6 md:w-1/2 lg:w-full flex-col items-center justify-start m-4">
-                      <img
-                        className="aspect-square w-full rounded-2xl object-cover"
-                        src={datum.image_url}
-                        alt={datum.name}
-                      />
-                      <div className="absolute bottom-0 right-0 h-3/4  w-full rounded-2xl bg-gradient-to-t from-stone-900"></div>
-                      <div className="absolute bottom-0  right-0  flex w-full flex-col justify-start p-4 text-left">
-                        <p className="gap-2 align-middle">
-                          <b className="text-lg font-bold">{datum.name}</b>
-                          &nbsp;&nbsp;
-                          <i className="font-light">{datum.price}</i>
+          {results && !toggle && results[0] ? (
+            [results[0]].map((datum: any, idx: number) => {
+              return (
+                <div
+                  className="z-20 -mt-80 flex h-full w-full flex-col items-center justify-start gap-4 rounded-2xl bg-stone-200 p-2 text-stone-900 lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-1/4"
+                  key={datum.id}
+                >
+                  <div className="relative m-4 flex w-5/6 flex-col items-center justify-start md:w-1/2 lg:w-full">
+                    <img
+                      className="aspect-square w-full rounded-2xl object-cover"
+                      src={datum.image_url}
+                      alt={datum.name}
+                    />
+                    <div className="absolute bottom-0 right-0 h-3/4  w-full rounded-2xl bg-gradient-to-t from-stone-900"></div>
+                    <div className="absolute bottom-0 right-0  flex  w-full flex-col justify-start p-4 text-left text-white">
+                      <p className="gap-2 align-middle">
+                        <b className="text-lg font-bold">{datum.name}</b>
+                        &nbsp;&nbsp;
+                        <i className="font-light">{datum.price}</i>
+                      </p>
+                      <p className="">
+                        {Math.round((datum.distance / 1609) * 100) / 100} miles
+                        away
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="h-8 flex items-center justify-center gap-2 align-center">
+                          <StarRatings
+                          
+                            rating={datum.rating}
+                            starRatedColor="gold"
+                            starEmptyColor="black"
+                            starDimension={"25px"}
+                            numberOfStars={5}
+                            name="rating"
+                          />{" "}
+                          ({datum.review_count})
                         </p>
-                        <p className="">
-                          {Math.round((datum.distance / 1609) * 100) / 100}{" "}
-                          miles away
-                        </p>
-                        <p className="">{datum.rating} Stars ({datum.review_count})</p>
+                        <Link href={datum.url}>
+                          <a rel="noreferrer noopener" target="_blank">
+                            <img
+                              className="h-8 rounded-lg bg-white p-0.5"
+                              src={"yelp.svg"}
+                            />
+                          </a>
+                        </Link>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="w-3/4">
-                    <p className="italic">{datum.categories.map((c:any) => c.title).join(" | ")}</p>
+                  <div className="w-full md:w-1/2 lg:w-full">
+                    <p className="italic">
+                      {datum.categories.map((c: any) => c.title).join(" | ")}
+                    </p>
                     <p>{datum.display_phone}</p>
                     <p>{datum.location.display_address.join("\n")}</p>
-                    </div>
-                    <button
-                      className=""
-                      onClick={() =>
-                        setResults((p) => p.filter((e) => e.id !== datum.id))
-                      }
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
                   </div>
-                )}) :           <button
-                className="-mt-40 z-20 h-20 w-full lg:mt-0 lg:absolute lg:w-1/4 lg:top-20 lg:left-20 my-10 rounded-2xl bg-stone-500 p-4 text-white flex items-center justify-center"
-                onClick={() => (setToggle(true), setTab(1))}
-              >
-                Try Again?
-              </button>
-              }
+                  <button
+                    className=""
+                    onClick={() =>
+                      setResults((p) => p.filter((e) => e.id !== datum.id))
+                    }
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              );
+            })
+          ) : (
+            <button
+              className="z-20 my-10 -mt-40 flex h-20 w-full items-center justify-center rounded-2xl bg-stone-500 p-4 text-white lg:absolute lg:top-20 lg:left-20 lg:mt-0 lg:w-1/4"
+              onClick={() => (setToggle(true), setTab(1))}
+            >
+              Try Again?
+            </button>
+          )}
 
           <button
-          className="my-10 h-10 rounded-2xl bg-stone-500 p-4 text-white flex items-center justify-center"
-          onClick={() => (setTab(1), setToggle(true)) }
-        >
-          Change up your search
-        </button>
-        <div style={{display: toggle? "block" : "none"}} className="h-full absolute bg-stone-800 bg-opacity-50 w-full">
+            className="my-10 flex h-10 items-center justify-center rounded-2xl bg-stone-500 p-4 text-white"
+            onClick={() => (setTab(1), setToggle(true))}
+          >
+            Change up your search
+          </button>
+          <div
+            style={{ display: toggle ? "block" : "none" }}
+            className="absolute h-full w-full bg-stone-800 bg-opacity-50"
+          ></div>
+        </div>
 
-        </div>
-        </div>
-        
         {/*MDOAL */}
         <div
           style={{ display: toggle ? "block" : "none" }}
@@ -234,7 +265,6 @@ const Home: NextPage = () => {
               <div className="h-1/2 w-full">
                 <Map
                   provider={tiler}
-                  defaultCenter={[40.7812, -73.9665]}
                   center={center}
                   zoom={zoom}
                   maxZoom={maxZoom + 3}
@@ -294,7 +324,10 @@ const Home: NextPage = () => {
             <div className="relative flex h-full w-full flex-col items-center justify-center">
               <div className="z-10 flex h-full w-full flex-col items-center justify-start text-lg">
                 <div className="h-1/2 w-full">
-                  <FoodIcons setToggle={setToggle} setFoodQuery={setFoodQuery} />
+                  <FoodIcons
+                    setToggle={setToggle}
+                    setFoodQuery={setFoodQuery}
+                  />
                 </div>
                 <div className="flex h-1/4 w-full flex-col items-center justify-center gap-4 p-4 py-8">
                   <h2 className="w-5/6 text-xl text-black">
