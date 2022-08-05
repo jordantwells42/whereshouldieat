@@ -209,7 +209,7 @@ const Home: NextPage = () => {
                     marginTop:
                       windowSize.width >= 1024 ? 0 : -windowSize.height / 2.2,
                   }}
-                  className="z-20 flex h-full w-full flex-col items-center justify-start gap-4 rounded-2xl bg-stone-200 p-2 text-stone-900 md:w-1/2 lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-1/4"
+                  className="z-20 flex h-full w-[300px] flex-col items-center justify-start rounded-2xl bg-stone-200 p-2 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
                   key={datum.id}
                   initial={{ rotate: 0, x: 0 }}
                   animate={{ rotate: rotation, x: x }}
@@ -276,7 +276,7 @@ const Home: NextPage = () => {
                     setPrevX(0);
                   }}
                 >
-                  <div className="relative m-4 flex w-full flex-col items-center justify-start">
+                  <div className="relative m-4 mb-0 flex w-full flex-col items-center justify-start">
                     <img
                       className="aspect-square w-5/6 rounded-2xl object-cover"
                       src={datum.image_url}
@@ -294,20 +294,25 @@ const Home: NextPage = () => {
                         away
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className="align-center flex h-8 items-center justify-center gap-2">
+                        <p className="w-full align-center flex h-8 items-center justify-center gap-2">
                           <StarRatings
                             rating={datum.rating}
                             starRatedColor="gold"
                             starEmptyColor="black"
                             starDimension={`${
-                              windowSize.width > 700 ? "12" : "12"
+                              windowSize.width > 700 ? "20" : "20"
                             }px`}
                             numberOfStars={5}
                             name="rating"
                           />{" "}
                           ({datum.review_count})
                         </p>
-                        <Link href={datum.url}>
+                        
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-5/6 flex items0-start justify-start mb-4">
+                  <Link  href={datum.url}>
                           <a rel="noreferrer noopener" target="_blank">
                             <img
                               className="h-8 rounded-lg bg-white p-0.5"
@@ -315,10 +320,7 @@ const Home: NextPage = () => {
                             />
                           </a>
                         </Link>
-                      </div>
-                    </div>
-                  </div>
-
+                        </div>
                   <div className="w-5/6">
                     <p className="italic">
                       {datum.categories.map((c: any) => c.title).join(" | ")}
