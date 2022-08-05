@@ -20,7 +20,7 @@ function getDevicePixelRatio() {
 }
 
 const Home: NextPage = () => {
-  const maxZoom = 16;
+  const maxZoom = 14;
 
   const [toggle, setToggle] = useState(true);
   const [tab, setTab] = useState(0);
@@ -201,7 +201,7 @@ const Home: NextPage = () => {
                     <p className="w-full h-30 flex-wrap">TEXT TEXT TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT  TEXT TEXT </p>
                   </div>
                 )}) :           <button
-                className="lg:absolute lg:w-1/4 lg:top-20 lg:left-20 my-10 h-10 rounded-2xl bg-stone-500 p-4 text-white flex items-center justify-center"
+                className="-mt-40 z-20 h-20 w-full lg:mt-0 lg:absolute lg:w-1/4 lg:top-20 lg:left-20 my-10 rounded-2xl bg-stone-500 p-4 text-white flex items-center justify-center"
                 onClick={() => (setToggle(true), setTab(1))}
               >
                 Try Again?
@@ -212,7 +212,7 @@ const Home: NextPage = () => {
           className="my-10 h-10 rounded-2xl bg-stone-500 p-4 text-white flex items-center justify-center"
           onClick={() => (setTab(1), setToggle(true)) }
         >
-          Try Again?
+          Change up your search
         </button>
         <div style={{display: toggle? "block" : "none"}} className="h-full absolute bg-red-800 bg-opacity-50 w-full">
 
