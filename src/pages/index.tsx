@@ -178,7 +178,7 @@ const Home: NextPage = () => {
                     </div>
 
                     <div className="w-3/4">
-                    <p className="italic">{datum.categories.map(c => c.title).join(" | ")}</p>
+                    <p className="italic">{datum.categories.map((c:any) => c.title).join(" | ")}</p>
                     <p>{datum.display_phone}</p>
                     <p>{datum.location.display_address.join("\n")}</p>
                     </div>
