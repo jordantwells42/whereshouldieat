@@ -19,17 +19,18 @@ function getDevicePixelRatio() {
 }
 
 const Home: NextPage = () => {
+  const maxZoom = 14;
 
-  const maxZoom = 14
-
-  const [toggle, setToggle] = useState(true)
-  const [tab, setTab]= useState(0)
+  const [toggle, setToggle] = useState(true);
+  const [tab, setTab] = useState(0);
   const [foodQuery, setFoodQuery] = useState("");
   const [results, setResults] = useState<Results>([]);
   const [haveMoved, setHaveMoved] = useState(false);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
   const [zoom, setZoom] = useState(maxZoom);
-  const [location, setLocation] = useState<[number, number]>([40.7812, -73.9665]);
+  const [location, setLocation] = useState<[number, number]>([
+    40.7812, -73.9665,
+  ]);
   const [locationQuery, setLocationQuery] = useState("");
   const [dprs, setDprs] = useState<number>(1);
 
@@ -101,77 +102,15 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div style={{opacity: toggle? 10: 100}} className="flex h-screen w-full flex-col items-center justify-center border-2 border-black">
-        <div style={{display: toggle? "block": "none"}} className="relative w-full lg:w-1/2 h-screen lg:h-1/2">
-        {/*WHERE*/}
-        {tab == 0 && 
-        <div className="absolute top-0 w-full h-full z-1 relative flex flex-col items-center justify-center">
-        <div className="mt-20 flex w-5/6 flex-col items-center  justify-center text-lg ">
-            <div className="flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-stone-800 p-4 lg:w-1/2">
-              <h2 className="w-5/6 text-white">
-                <b className="italic">Where</b> do you want to eat?
-              </h2>
-              <DebounceInput
-                className="w-5/6 rounded-2xl border-2 border-black p-2"
-                value={locationQuery}
-                placeholder="Downtown Austin"
-                debounceTimeout={200}
-                onChange={(e) => [
-                  setLocationQuery(e.target.value),
-                  search(e.target.value, foodQuery),
-                ]}
-              />
-            </div>
-          </div>
-          <div className="w-5/6 h-1/2 lg:md-1/2">
-          <Map
-            provider={tiler}
-            metaWheelZoom={true}
-            defaultCenter={[40.7812, -73.9665]}
-            center={center}
-            //@ts-expect-error
-            metaWheelZoomWarning={null}
-            zoom={zoom}
-            maxZoom={maxZoom+3}
-            onClick={handleSelectLocation}
-            onBoundsChanged={({ center, zoom }) => {
-              setZoom(zoom)
-              setCenter(center);
-              setHaveMoved(true);
-            }}
-          >
-            <ZoomControl />
-            <Marker width={50} anchor={location} onClick={handleMarkerClick} />
-          </Map>
-          </div>
-          <input value={tab} onChange={(e) => setTab(Number(e.target.value))}></input>
-        </div>
-        }
-        {/*WHAT*/}
-        {tab == 1 && 
-        <div className="absolute top-0 flex h-full w-full flex-col items-center justify-start border-2 bg-red-300 text-lg">
-          <div className="mt-20 flex w-5/6 flex-col items-center justify-center gap-2 rounded-2xl bg-stone-800 p-4 lg:w-1/2">
-            <h2 className="w-5/6 text-white">
-              <b className="italic">What</b> do you want to eat?
-            </h2>
-            <DebounceInput
-              className="w-5/6 rounded-2xl border-2 border-black p-2"
-              value={foodQuery}
-              placeholder="Pizza"
-              debounceTimeout={200}
-              onChange={(e) => [
-                setFoodQuery(e.target.value),
-                search(locationQuery, e.target.value),
-              ]}
-            />
-          </div>
-          <input value={tab} onChange={(e) => setTab(Number(e.target.value))}></input>
-        </div>}
-        </div>
+      <div
+        style={{ backgroundBlendMode: toggle ? "darken" : "" }}
+        className="relative flex h-screen w-full flex-col items-center justify-center  bg-stone-200"
+      >
         {/*TINDER*/}
-        <div className="z-1 h-screen w-full bg-red-300">
+        <div className="h-screen w-full ">
           <div className="flex-reverse-col relative flex w-full items-center justify-center bg-white ">
             {results &&
+              !toggle &&
               results.map((datum: any, idx: number) => {
                 return (
                   <div
@@ -227,6 +166,138 @@ const Home: NextPage = () => {
                 );
               })}
           </div>
+        </div>
+        <button onClick={() => setToggle(true)}>Lmao</button>
+        {/*MDOAL */}
+        <div
+          style={{ display: toggle ? "block" : "none" }}
+          className="absolute top-0 z-20 h-screen w-full bg-stone-50 md:top-20 md:h-3/4 md:w-3/4 md:rounded-2xl"
+        >
+          {/*WHERE*/}
+          {tab == 0 && (
+            <div className="relative flex h-full w-full flex-col items-center justify-start">
+              <div className="h-1/2 w-full">
+                <Map
+                  provider={tiler}
+                  metaWheelZoom={true}
+                  defaultCenter={[40.7812, -73.9665]}
+                  center={center}
+                  //@ts-expect-error
+                  metaWheelZoomWarning={null}
+                  zoom={zoom}
+                  maxZoom={maxZoom + 3}
+                  onClick={handleSelectLocation}
+                  onBoundsChanged={({ center, zoom }) => {
+                    setZoom(zoom);
+                    setCenter(center);
+                    setHaveMoved(true);
+                  }}
+                >
+                  <ZoomControl />
+                  <Marker
+                    width={50}
+                    anchor={location}
+                    onClick={handleMarkerClick}
+                  />
+                </Map>
+              </div>
+              <div className="flex w-full flex-col items-center justify-center gap-4 p-4 py-8">
+                <h2 className="w-5/6 text-xl text-black">
+                  <b className="italic">Where</b> do you want to eat?
+                </h2>
+                <DebounceInput
+                  className="w-5/6 rounded-2xl border-2 border-black p-2"
+                  value={locationQuery}
+                  placeholder="Downtown Austin"
+                  debounceTimeout={200}
+                  onChange={(e) => [
+                    setLocationQuery(e.target.value),
+                    search(e.target.value, foodQuery),
+                  ]}
+                />
+              </div>
+              <button
+                className="absolute bottom-5 right-5"
+                onClick={() => setTab((p) => p + 1)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-16 w-16"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
+          {/*WHAT*/}
+          {tab == 1 && (
+            <div className="relative flex h-full w-full flex-col items-center justify-center">
+              <div className="z-10 flex h-full w-full flex-col items-center justify-start text-lg">
+                <div className="w-full h-1/2">lil food icons here</div>
+                <div className="flex w-full flex-col items-center justify-center gap-4 p-4 py-8">
+                  <h2 className="w-5/6 text-xl text-black">
+                    <b className="italic">What</b> do you want to eat?
+                  </h2>
+                  <DebounceInput
+                    className="w-5/6 rounded-2xl border-2 border-black p-2"
+                    value={foodQuery}
+                    placeholder="Pizza"
+                    debounceTimeout={200}
+                    onChange={(e) => [
+                      setFoodQuery(e.target.value),
+                      search(locationQuery, e.target.value),
+                    ]}
+                  />
+                </div>
+                <button
+                  className="absolute bottom-5 left-5"
+                  onClick={() => setTab(0)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-16 w-16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+                <button
+                  className="absolute bottom-5 right-5"
+                  onClick={() => (setTab(0), setToggle(false))}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-16 w-16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>
