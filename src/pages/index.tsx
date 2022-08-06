@@ -60,7 +60,7 @@ const Home: NextPage = () => {
   const [tab, setTab] = useState(0);
   const [foodQuery, setFoodQuery] = useState("");
   const [results, setResults] = useState<Results>([]);
-  const [resultIds, setResultIds] = useState<number[]>([]);
+  const [resultIds, setResultIds] = useState<string[]>([]);
   const [business, setBusiness] = useState<Result>(undefined);
   const router = useRouter();
   const [firstLoad, setFirstLoad] = useState(true);
@@ -180,13 +180,8 @@ const Home: NextPage = () => {
       .then((res) => {
         setResultIds(res.businesses.map((r: Result) => r.id));
         setResults(res.businesses);
-        fetch(`/api/business?id=${res.businesses[0].id}`)
-          .then((res) => {
-            return res.json();
-          })
-          .then((res) => {
-            setBusiness(res);
-          });
+        newBusiness(res.businesses[0].id)
+        
         if (locationStr) {
           console.log("AYO", locationStr);
           setLocation([
@@ -223,16 +218,27 @@ const Home: NextPage = () => {
     //setLocation(anchor)
     zoomRef.current = maxZoom;
   }
+
+  function newBusiness(id: string | undefined){
+    fetch(`/api/business?id=${id}`)
+    .then((res) => {
+      return res.json();
+    })
+    .then((res) => {
+      setBusiness(res);
+    });
+  }
+
+
   function swipeLeft() {
     if (resultIds.length > 1) {
-      fetch(`/api/business?id=${resultIds[resultIds.indexOf(business.id) + 1]}`)
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          setBusiness(res);
-        });
-      setResultIds((p) => p.slice(1));
+      setResultIds((p) => {
+        const newP = p.filter((id) => id !== business.id)
+        newBusiness(newP[0])
+        return newP
+      });
+      
+
     } else {
       setBusiness(undefined);
       setResultIds([]);
@@ -284,16 +290,16 @@ const Home: NextPage = () => {
                   zoomRef.current =zoom;
                 }}
               >
-                {results &&
+                {business && results &&
                   results
-                    .slice(results.length - resultIds.length)
+                    .slice()
                     .reverse()
-                    .map((result) => (
+                    .map((result) => (resultIds.includes(result.id) && (
                       <Marker
                         key={result.id}
                         color={
                           result.id ===
-                          results[results.length - resultIds.length].id
+                          business.id
                             ? "salmon"
                             : "lightblue"
                         }
@@ -302,9 +308,9 @@ const Home: NextPage = () => {
                           result.coordinates.latitude,
                           result.coordinates.longitude,
                         ]}
-                        onClick={handleMarkerClick}
+                        onClick={() => newBusiness(result.id)}
                       />
-                    ))}
+                    )))}
               </Map>
             }
           </div>
@@ -349,7 +355,8 @@ const Home: NextPage = () => {
                           <i className="font-light">{datum.price}</i>
                         </p>
                         <p className="">
-                          {Math.round(
+                          {results[results.length - resultIds.length]
+                              .distance && Math.round(
                             (results[results.length - resultIds.length]
                               .distance /
                               1609) *
