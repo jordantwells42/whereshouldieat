@@ -8,7 +8,7 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { useGesture } from "@use-gesture/react";
 import { useSpring, animated, config } from "react-spring";
-import { motion } from "framer-motion";
+import { m, motion } from "framer-motion";
 import { DebounceInput } from "react-debounce-input";
 import FoodIcons from "../components/FoodIcons";
 import StarRatings from "react-star-ratings";
@@ -150,9 +150,10 @@ const Home: NextPage = () => {
     {
       drag: {
         filterTaps: true,
-        preventScroll: true,
+        preventDefault: true,
+        //preventScroll: true,
         axis: "x",
-      }
+      },
     }
   );
   useEffect(() => {
@@ -331,6 +332,7 @@ const Home: NextPage = () => {
                     x,
                     rotate,
                     scale,
+                    touchAction: "pan-y"
                   }}
                   className="z-10 flex h-full w-[300px] flex-col items-center justify-start rounded-2xl bg-stone-50 p-2 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
                   key={datum.id}
@@ -341,11 +343,12 @@ const Home: NextPage = () => {
                       <Carousel
                         showThumbs={false}
                         className="absolute bottom-0 aspect-square w-full"
+                        
                       >
                         {datum.photos.map((photo: string) => {
                           return (
                             <img
-                              className="aspect-square w-full rounded-2xl object-cover  "
+                              className="aspect-square w-full rounded-2xl object-cover "
                               key={photo}
                               src={photo}
                               alt={datum.name}
