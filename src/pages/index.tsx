@@ -486,8 +486,8 @@ const Home: NextPage = () => {
 
         {/*MDOAL */}
         <div
-          style={{ display: toggle ? "block" : "none" }}
-          className="absolute top-0 z-20 h-screen w-full bg-stone-50 md:top-20 md:h-3/4 md:w-3/4 md:rounded-2xl"
+          style={{ display: toggle ? "block" : "none", height: windowSize.height > 700 ? windowSize.height*3/4 : windowSize.height }}
+          className="absolute top-0 z-20 w-full bg-stone-50 md:top-20 md:w-3/4 md:rounded-2xl"
         >
           {/*WHERE*/}
           {tab == 0 && (
