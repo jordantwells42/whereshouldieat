@@ -4,7 +4,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
-import { Carousel } from 'react-responsive-carousel';
+import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { useGesture } from "@use-gesture/react";
 import { useSpring, animated, config } from "react-spring";
@@ -13,7 +13,6 @@ import { DebounceInput } from "react-debounce-input";
 import FoodIcons from "../components/FoodIcons";
 import StarRatings from "react-star-ratings";
 import Link from "next/link";
-
 
 function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
@@ -65,7 +64,7 @@ const Home: NextPage = () => {
   const [business, setBusiness] = useState<Result>(undefined);
   const router = useRouter();
   const [firstLoad, setFirstLoad] = useState(true);
-  const [center, setCenter] = useState<[number, number]>([0, 0]);
+  const [center, setCenter] = useState<[number, number]>([40.7812, -73.9665]);
   const [zoom, setZoom] = useState(maxZoom);
   const [location, setLocation] = useState<[number, number]>([
     40.7812, -73.9665,
@@ -151,18 +150,16 @@ const Home: NextPage = () => {
     { drag: { filterTaps: true } }
   );
   useEffect(() => {
-    if (!locationQuery) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((e) => {
-          setLocation([e.coords.latitude, e.coords.longitude]);
-          setCenter([e.coords.latitude, e.coords.longitude]);
-          search(`${e.coords.latitude}, ${e.coords.longitude}`, "");
-        });
-      } else {
-        setLocation([40.7812, -73.9665]);
-        setCenter([40.7812, -73.9665]);
-        search("40.7812, -73.9665", "");
-      }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((e) => {
+        setLocation([e.coords.latitude, e.coords.longitude]);
+        setCenter([e.coords.latitude, e.coords.longitude]);
+        search(`${e.coords.latitude}, ${e.coords.longitude}`, "");
+      });
+    } else {
+      setLocation([40.7812, -73.9665]);
+      setCenter([40.7812, -73.9665]);
+      search("40.7812, -73.9665", "");
     }
   }, []);
 
@@ -176,7 +173,7 @@ const Home: NextPage = () => {
   function search(locationStr: string, foodStr: string) {
     fetch(
       `/api/search-area?q=${foodStr || "food"}&l=${
-        location[0] + "," + location[1]
+        locationStr || location[0] + "," + location[1]
       }`
     )
       .then((res) => {
@@ -232,12 +229,11 @@ const Home: NextPage = () => {
         .then((res) => {
           setBusiness(res);
         });
-        setResultIds((p) => p.slice(1));
+      setResultIds((p) => p.slice(1));
     } else {
-      setBusiness(undefined)
+      setBusiness(undefined);
       setResultIds([]);
     }
-    
   }
 
   function swipeRight() {
@@ -247,7 +243,7 @@ const Home: NextPage = () => {
       },${business.coordinates.longitude}`
     );
   }
-  console.log(business)
+  console.log(business);
   return (
     <>
       <Head>
@@ -293,7 +289,10 @@ const Home: NextPage = () => {
                       <Marker
                         key={result.id}
                         color={
-                          result.id === results[results.length - resultIds.length].id ? "salmon" : "lightblue"
+                          result.id ===
+                          results[results.length - resultIds.length].id
+                            ? "salmon"
+                            : "lightblue"
                         }
                         width={50}
                         anchor={[
@@ -323,19 +322,21 @@ const Home: NextPage = () => {
                   {...bind()}
                 >
                   <div className="flex w-5/6 flex-col items-center justify-start">
-                    <div className="relative m-4 mb-0 flex w-full aspect-square flex-col items-center justify-start">
-                    <Carousel showThumbs={false} className="absolute bottom-0 w-full aspect-square">
-                    {datum.photos.map((photo:string) => {
-                      return (
-
-                        <img
-                        className="object-cover w-full aspect-square rounded-2xl  "
-                        key={photo}
-                        src={photo}
-                        alt={datum.name}
-                      />)
-                      })
-                      }
+                    <div className="relative m-4 mb-0 flex aspect-square w-full flex-col items-center justify-start">
+                      <Carousel
+                        showThumbs={false}
+                        className="absolute bottom-0 aspect-square w-full"
+                      >
+                        {datum.photos.map((photo: string) => {
+                          return (
+                            <img
+                              className="aspect-square w-full rounded-2xl object-cover  "
+                              key={photo}
+                              src={photo}
+                              alt={datum.name}
+                            />
+                          );
+                        })}
                       </Carousel>
                       <div className="absolute bottom-0  flex h-3/4 w-full  items-center rounded-2xl bg-gradient-to-t from-stone-900"></div>
                       <div className="absolute bottom-5  flex w-full flex-col justify-start p-4 text-left text-white">
@@ -345,7 +346,12 @@ const Home: NextPage = () => {
                           <i className="font-light">{datum.price}</i>
                         </p>
                         <p className="">
-                          {Math.round((results[results.length - resultIds.length].distance / 1609) * 100) / 100}{" "}
+                          {Math.round(
+                            (results[results.length - resultIds.length]
+                              .distance /
+                              1609) *
+                              100
+                          ) / 100}{" "}
                           miles away
                         </p>
                         <div className="flex items-center justify-between">
@@ -368,12 +374,28 @@ const Home: NextPage = () => {
                     <div className="z-20 mb-4 flex w-full justify-center gap-4">
                       <Link href={datum.url}>
                         <a rel="noreferrer noopener" target="_blank">
-                          <img alt="yelp" className="h-8 rounded-lg" src={"yelp.svg"} />
+                          <img
+                            alt="yelp"
+                            className="h-8 rounded-lg"
+                            src={"yelp.svg"}
+                          />
                         </a>
                       </Link>
-                      <button onClick={swipeRight}>
-                        <img alt="maps" className="h-8 rounded-lg" src={"maps.svg"} />
-                      </button>
+                      <Link
+                        href={`https://www.google.com/maps/dir/${location.join(
+                          ","
+                        )}/${business.coordinates.latitude},${
+                          business.coordinates.longitude
+                        }`}
+                      >
+                        <a rel="noreferrer noopener" target="_blank">
+                          <img
+                            alt="yelp"
+                            className="h-8 rounded-lg"
+                            src={"maps.svg"}
+                          />
+                        </a>
+                      </Link>
                     </div>
                     <div className="m-5 w-full">
                       <p className="italic">
