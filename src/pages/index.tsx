@@ -165,10 +165,10 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     if (!firstLoad) {
-      search(locationQuery, foodQuery);
+      search("", foodQuery);
     }
     setFirstLoad(false);
-  }, [locationQuery, foodQuery]);
+  }, [foodQuery]);
 
   function search(locationStr: string, foodStr: string) {
     fetch(
@@ -207,6 +207,7 @@ const Home: NextPage = () => {
   }) {
     setCenter(latLng);
     setLocation(latLng);
+    search(latLng.join(","), foodQuery)
   }
 
   function handleMarkerClick({
