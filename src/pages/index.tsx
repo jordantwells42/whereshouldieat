@@ -4,8 +4,11 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState, useCallback } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
+
+import { useDrag, useGesture } from "@use-gesture/react";
 import { stamenToner } from "pigeon-maps/providers";
 import debounce from "lodash.debounce";
+import { useSpring, animated, config } from "react-spring";
 import { motion } from "framer-motion";
 import { DebounceInput } from "react-debounce-input";
 import FoodIcons from "../components/FoodIcons";
@@ -25,6 +28,7 @@ function useWindowSize() {
     width: 1080,
     height: 720,
   });
+
   useEffect(() => {
     // Handler to call on window resize
     function handleResize() {
@@ -53,10 +57,8 @@ const Home: NextPage = () => {
   const windowSize = useWindowSize();
 
   const [prevX, setPrevX] = useState(0);
-  const [x, setX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [initX, setInitX] = useState(0);
-  const [rotation, setRotation] = useState(0);
   const [toggle, setToggle] = useState(true);
   const [tab, setTab] = useState(0);
   const [foodQuery, setFoodQuery] = useState("");
@@ -71,6 +73,83 @@ const Home: NextPage = () => {
   const [locationQuery, setLocationQuery] = useState("");
   const [dprs, setDprs] = useState<number>(1);
 
+  const [{ x, rotate, scale }, api] = useSpring(() => ({
+    x: 0,
+    rotate: 0,
+    scale: 1,
+  }));
+
+  const bind = useGesture(
+    {
+      onDrag:
+        // @ts-ignore
+        ({ down, movement: [mx], direction: [dx], velocity: [vx] }) => {
+          if (!windowSize || !windowSize.width) {
+            return;
+          }
+          const trigger = Math.abs(mx) > windowSize.width / 4;
+          // @ts-ignore
+          api.start(() => {
+            if (!windowSize || !windowSize.width) {
+              return;
+            }
+            const x = !down ? 0 : trigger ? mx * 1 : mx;
+            const rotate = !down
+              ? 0
+              : windowSize.width < 500
+              ? mx / 20
+              : mx / 50;
+            const scale = down ? 1.05 : 1;
+            setPrevX(x);
+            return {
+              x,
+              rotate,
+              scale,
+              config: config.wobbly,
+            };
+          });
+        },
+
+      onDragEnd: ({
+        down,
+        // @ts-ignore
+        movement: [mx],
+        // @ts-ignore
+        direction: [dx],
+        // @ts-ignore
+        velocity: [vx],
+      }) => {
+        if (!windowSize || !windowSize.width) {
+          return;
+        }
+        const trigger = Math.abs(mx) > windowSize.width / 4;
+        // @ts-ignore
+        api.start(() => {
+          function handleTrigger() {
+            if (mx > 0) {
+              console.log("Swipe Right");
+              swipeRight();
+            } else {
+              console.log("Swipe Left");
+              swipeLeft();
+            }
+          }
+
+          if (trigger) {
+            handleTrigger();
+          }
+
+          return {
+            x: 0,
+            rotate: 0,
+            scale: 1,
+            config: config.gentle,
+          };
+        });
+      },
+    },
+    { drag: { filterTaps: true } }
+  );
   useEffect(() => {
     if (!locationQuery) {
       if (navigator.geolocation) {
@@ -162,7 +241,7 @@ const Home: NextPage = () => {
         className="relative flex h-full w-full flex-col items-center justify-center  bg-stone-700"
       >
         {/*TINDER*/}
-        <div className="relative flex h-full w-full flex-col items-center justify-center">
+        <div className="relative flex h-full w-full flex-col items-center justify-center overflow-x-hidden">
           <div
             style={{ height: windowSize.height }}
             className="flex w-full items-center justify-center "
@@ -187,170 +266,122 @@ const Home: NextPage = () => {
                 }}
               >
                 {results &&
-                  results.slice().reverse().map((result) => (
-                    <Marker
-                      key={result.id}
-                      color={result.id === results[0].id ? "salmon" : "lightblue"}
-                      width={50}
-                      anchor={[
-                        result.coordinates.latitude,
-                        result.coordinates.longitude,
-                      ]}
-                      onClick={handleMarkerClick}
-                    />
-                  ))}
+                  results
+                    .slice()
+                    .reverse()
+                    .map((result) => (
+                      <Marker
+                        key={result.id}
+                        color={
+                          result.id === results[0].id ? "salmon" : "lightblue"
+                        }
+                        width={50}
+                        anchor={[
+                          result.coordinates.latitude,
+                          result.coordinates.longitude,
+                        ]}
+                        onClick={handleMarkerClick}
+                      />
+                    ))}
               </Map>
             }
           </div>
           {results && !toggle && results[0] ? (
             [results[0]].map((datum: any, idx: number) => {
               return (
-                <motion.div
+                <animated.div
                   style={{
                     marginTop:
                       windowSize.width >= 1024 ? 0 : -windowSize.height / 2.2,
+                    x,
+                    rotate,
+                    scale,
+                    touchAction: "none",
                   }}
-                  className="z-20 flex h-full w-[300px] flex-col items-center justify-start rounded-2xl bg-stone-200 p-2 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
+                  className="z-10 flex h-full w-[300px] touch-none flex-col items-center justify-start rounded-2xl bg-sky-50 p-2 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
                   key={datum.id}
-                  initial={{ rotate: 0, x: 0 }}
-                  animate={{ rotate: rotation, x: x }}
-                  draggable
-                  onTouchStart={(e: any) => {
-                    console.log(e);
-                    setInitX(e.touches[0].clientX);
-                  }}
-                  onTouchMove={(e: any) => {
-                    const ox = e.targetTouches[0].clientX - initX;
-                    if (Math.abs(ox - prevX) > 80) {
-                      return;
-                    }
-                    console.log(ox);
-                    const f = 2;
-                    setRotation(ox / (f * 10));
-                    setX(ox / f);
-                    setPrevX(ox);
-                  }}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    setDragging(false);
-                    setRotation(0);
-
-                    const thresh = 80;
-                    console.log(x);
-                    if (x > thresh) {
-                      swipeRight();
-                    } else if (x < -thresh) {
-                      swipeLeft();
-                    }
-                    setX(0);
-                    setPrevX(0);
-                  }}
-                  onDragStart={(e: any) => {
-                    console.log(e);
-                    setInitX(e.clientX);
-                  }}
-                  onDrag={(e: any) => {
-                    e.preventDefault();
-                    const ox = e.clientX - initX;
-                    if (Math.abs(ox - prevX) > 80) {
-                      return;
-                    }
-                    console.log(ox);
-                    const f = 3;
-                    setRotation(ox / (f * 10));
-                    setX(ox / f);
-                    setPrevX(ox);
-                  }}
-                  onDragEnd={(e) => {
-                    e.preventDefault();
-                    setDragging(false);
-                    setRotation(0);
-
-                    const thresh = 80;
-                    console.log(x);
-                    if (x > thresh) {
-                      swipeRight();
-                    } else if (x < -thresh) {
-                      swipeLeft();
-                    }
-                    setX(0);
-                    setPrevX(0);
-                  }}
+                  {...bind()}
                 >
-                  <div className="relative m-4 mb-0 flex w-full flex-col items-center justify-start">
-                    <img
-                      className="aspect-square w-5/6 rounded-2xl object-cover"
-                      src={datum.image_url}
-                      alt={datum.name}
-                    />
-                    <div className="absolute bottom-0  flex h-3/4 w-5/6 items-center rounded-2xl bg-gradient-to-t from-stone-900"></div>
-                    <div className="absolute bottom-0  flex  w-5/6 flex-col justify-start p-4 text-left text-white">
-                      <p className="gap-2 align-middle">
-                        <b className="text-lg font-bold">{datum.name}</b>
-                        &nbsp;&nbsp;
-                        <i className="font-light">{datum.price}</i>
-                      </p>
-                      <p className="">
-                        {Math.round((datum.distance / 1609) * 100) / 100} miles
-                        away
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <p className="w-full align-center flex h-8 items-center justify-center gap-2">
-                          <StarRatings
-                            rating={datum.rating}
-                            starRatedColor="gold"
-                            starEmptyColor="black"
-                            starDimension={`${
-                              windowSize.width > 700 ? "20" : "20"
-                            }px`}
-                            numberOfStars={5}
-                            name="rating"
-                          />{" "}
-                          ({datum.review_count})
+                  <div className="flex w-5/6 flex-col items-center justify-start">
+                    <div className="relative m-4 mb-0 flex w-full flex-col items-center justify-start">
+                      <img
+                        className="aspect-square rounded-2xl object-cover"
+                        src={datum.image_url}
+                        alt={datum.name}
+                      />
+                      <div className="absolute bottom-0  flex h-3/4 w-full  items-center rounded-2xl bg-gradient-to-t from-stone-900"></div>
+                      <div className="absolute bottom-0  flex w-full flex-col justify-start p-4 text-left text-white">
+                        <p className="gap-2 align-middle">
+                          <b className="text-lg font-bold">{datum.name}</b>
+                          &nbsp;&nbsp;
+                          <i className="font-light">{datum.price}</i>
                         </p>
-                        
+                        <p className="">
+                          {Math.round((datum.distance / 1609) * 100) / 100}{" "}
+                          miles away
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="align-center flex h-8 w-full items-center justify-center gap-2">
+                            <StarRatings
+                              rating={datum.rating}
+                              starRatedColor="gold"
+                              starEmptyColor="black"
+                              starDimension={`${
+                                windowSize.width > 700 ? "20" : "20"
+                              }px`}
+                              numberOfStars={5}
+                              name="rating"
+                            />{" "}
+                            ({datum.review_count})
+                          </div>
+                        </div>
                       </div>
                     </div>
+
+                    <div className="m-5 w-full">
+                      <p className="italic">
+                        {datum.categories.map((c: any) => c.title).join(" | ")}
+                      </p>
+                      <p>{datum.display_phone}</p>
+                      <p>{datum.location.display_address.join("\n")}</p>
+                    </div>
+
+                    <div className="mt-10 flex w-full items-center justify-between ">
+                      <button onClick={swipeLeft}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-12 w-12"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                      <button onClick={swipeRight}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-12 w-12"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="red"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                  <div className="w-5/6 flex items0-start justify-start mb-4">
-                  <Link  href={datum.url}>
-                          <a rel="noreferrer noopener" target="_blank">
-                            <img
-                              className="h-8 rounded-lg bg-white p-0.5"
-                              src={"yelp.svg"}
-                            />
-                          </a>
-                        </Link>
-                        </div>
-                  <div className="w-5/6">
-                    <p className="italic">
-                      {datum.categories.map((c: any) => c.title).join(" | ")}
-                    </p>
-                    <p>{datum.display_phone}</p>
-                    <p>{datum.location.display_address.join("\n")}</p>
-                  </div>
-                  <button
-                    className=""
-                    onClick={() =>
-                      setResults((p) => p.filter((e) => e.id !== datum.id))
-                    }
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </motion.div>
+                </animated.div>
               );
             })
           ) : (
