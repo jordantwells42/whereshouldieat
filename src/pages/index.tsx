@@ -2,7 +2,7 @@
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
@@ -64,8 +64,8 @@ const Home: NextPage = () => {
   const [business, setBusiness] = useState<Result>(undefined);
   const router = useRouter();
   const [firstLoad, setFirstLoad] = useState(true);
-  const [center, setCenter] = useState<[number, number]>([40.7812, -73.9665]);
-  const [zoom, setZoom] = useState(maxZoom);
+  const centerRef = useRef<[number, number]>([40.7812, -73.9665]);
+  const zoomRef = useRef<number>(maxZoom);
   const [location, setLocation] = useState<[number, number]>([
     40.7812, -73.9665,
   ]);
@@ -153,11 +153,11 @@ const Home: NextPage = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((e) => {
         setLocation([e.coords.latitude, e.coords.longitude]);
-        setCenter([e.coords.latitude, e.coords.longitude]);
+        centerRef.current = [e.coords.latitude, e.coords.longitude];
       });
     } else {
       setLocation([40.7812, -73.9665]);
-      setCenter([40.7812, -73.9665]);
+      centerRef.current = [40.7812, -73.9665];
     }
   }, []);
 
@@ -188,12 +188,12 @@ const Home: NextPage = () => {
             setBusiness(res);
           });
         if (locationStr) {
-          console.log("AYO", locationStr)
+          console.log("AYO", locationStr);
           setLocation([
             res.region.center.latitude,
             res.region.center.longitude,
           ]);
-          setCenter([res.region.center.latitude, res.region.center.longitude]);
+          centerRef.current = [res.region.center.latitude, res.region.center.longitude];
         }
       })
       .catch((err) => {
@@ -208,7 +208,7 @@ const Home: NextPage = () => {
     event: MouseEvent;
     latLng: [number, number];
   }) {
-    setCenter(latLng);
+    centerRef.current = latLng;
     setLocation(latLng);
   }
 
@@ -219,9 +219,9 @@ const Home: NextPage = () => {
     event: MouseEvent;
     anchor: [number, number];
   }) {
-    setCenter(anchor);
+    centerRef.current = anchor;
     //setLocation(anchor)
-    setZoom(maxZoom);
+    zoomRef.current = maxZoom;
   }
   function swipeLeft() {
     if (resultIds.length > 1) {
@@ -274,14 +274,14 @@ const Home: NextPage = () => {
                         business.coordinates.latitude,
                         business.coordinates.longitude,
                       ]
-                    : center
+                    : centerRef.current
                 }
-                zoom={zoom}
+                zoom={zoomRef.current}
                 maxZoom={maxZoom + 3}
                 onClick={handleSelectLocation}
                 onBoundsChanged={({ center, zoom }) => {
-                  setZoom(zoom);
-                  setCenter(center);
+                  centerRef.current = center;
+                  zoomRef.current =zoom;
                 }}
               >
                 {results &&
@@ -478,13 +478,13 @@ const Home: NextPage = () => {
               <div className="h-1/2 w-full">
                 <Map
                   provider={tiler}
-                  center={center}
-                  zoom={zoom}
+                  center={centerRef.current}
+                  zoom={zoomRef.current}
                   maxZoom={maxZoom + 3}
                   onClick={handleSelectLocation}
                   onBoundsChanged={({ center, zoom }) => {
-                    setZoom(zoom);
-                    setCenter(center);
+                    centerRef.current = center;
+                    zoomRef.current = zoom;
                   }}
                 >
                   <ZoomControl />
