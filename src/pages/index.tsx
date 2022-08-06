@@ -188,6 +188,7 @@ const Home: NextPage = () => {
             setBusiness(res);
           });
         if (locationStr) {
+          console.log("AYO", locationStr)
           setLocation([
             res.region.center.latitude,
             res.region.center.longitude,
@@ -245,7 +246,7 @@ const Home: NextPage = () => {
       },${business.coordinates.longitude}`
     );
   }
-  console.log(business);
+
   return (
     <>
       <Head>
@@ -511,7 +512,7 @@ const Home: NextPage = () => {
               </div>
               <button
                 className="absolute bottom-5 right-5 h-1/4"
-                onClick={() => (setTab((p) => p + 1))}
+                onClick={() => (search("", ""), setTab((p) => p + 1))}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
