@@ -154,12 +154,10 @@ const Home: NextPage = () => {
       navigator.geolocation.getCurrentPosition((e) => {
         setLocation([e.coords.latitude, e.coords.longitude]);
         setCenter([e.coords.latitude, e.coords.longitude]);
-        search(`${e.coords.latitude}, ${e.coords.longitude}`, "");
       });
     } else {
       setLocation([40.7812, -73.9665]);
       setCenter([40.7812, -73.9665]);
-      search("40.7812, -73.9665", "");
     }
   }, []);
 
@@ -189,9 +187,13 @@ const Home: NextPage = () => {
           .then((res) => {
             setBusiness(res);
           });
-        setLocation([res.region.center.latitude, res.region.center.longitude]);
-        setCenter([res.region.center.latitude, res.region.center.longitude]);
-        setZoom(maxZoom);
+        if (locationStr) {
+          setLocation([
+            res.region.center.latitude,
+            res.region.center.longitude,
+          ]);
+          setCenter([res.region.center.latitude, res.region.center.longitude]);
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -207,7 +209,6 @@ const Home: NextPage = () => {
   }) {
     setCenter(latLng);
     setLocation(latLng);
-    search(latLng.join(","), foodQuery)
   }
 
   function handleMarkerClick({
@@ -510,7 +511,7 @@ const Home: NextPage = () => {
               </div>
               <button
                 className="absolute bottom-5 right-5 h-1/4"
-                onClick={() => setTab((p) => p + 1)}
+                onClick={() => (setTab((p) => p + 1))}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -550,7 +551,7 @@ const Home: NextPage = () => {
                     debounceTimeout={200}
                     onChange={(e) => [
                       setFoodQuery(e.target.value),
-                      search(locationQuery, e.target.value),
+                      search("", e.target.value),
                     ]}
                   />
                 </div>
