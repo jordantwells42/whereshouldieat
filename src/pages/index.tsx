@@ -86,7 +86,7 @@ const Home: NextPage = () => {
           if (!windowSize || !windowSize.width) {
             return;
           }
-          const trigger = Math.abs(mx) > windowSize.width / 4;
+          const trigger = Math.abs(mx) > windowSize.width / (windowSize.width > 700 ? 4 : 2);
           // @ts-ignore
           api.start(() => {
             if (!windowSize || !windowSize.width) {
@@ -121,7 +121,7 @@ const Home: NextPage = () => {
         if (!windowSize || !windowSize.width) {
           return;
         }
-        const trigger = Math.abs(mx) > windowSize.width / 4;
+        const trigger = Math.abs(mx) > windowSize.width / (windowSize.width > 700 ? 4 : 2);
         // @ts-ignore
         api.start(() => {
           function handleTrigger() {
