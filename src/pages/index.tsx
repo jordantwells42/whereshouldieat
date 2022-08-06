@@ -147,7 +147,14 @@ const Home: NextPage = () => {
         });
       },
     },
-    { drag: { filterTaps: true } }
+    {
+      drag: {
+        filterTaps: true,
+        preventScroll: true,
+        axis: "x",
+      },
+      scroll: {  enabled: true, axis:"y" },
+    }
   );
   useEffect(() => {
     if (navigator.geolocation) {
@@ -180,15 +187,18 @@ const Home: NextPage = () => {
       .then((res) => {
         setResultIds(res.businesses.map((r: Result) => r.id));
         setResults(res.businesses);
-        newBusiness(res.businesses[0].id)
-        
+        newBusiness(res.businesses[0].id);
+
         if (locationStr) {
           console.log("AYO", locationStr);
           setLocation([
             res.region.center.latitude,
             res.region.center.longitude,
           ]);
-          centerRef.current = [res.region.center.latitude, res.region.center.longitude];
+          centerRef.current = [
+            res.region.center.latitude,
+            res.region.center.longitude,
+          ];
         }
       })
       .catch((err) => {
@@ -219,26 +229,23 @@ const Home: NextPage = () => {
     zoomRef.current = maxZoom;
   }
 
-  function newBusiness(id: string | undefined){
+  function newBusiness(id: string | undefined) {
     fetch(`/api/business?id=${id}`)
-    .then((res) => {
-      return res.json();
-    })
-    .then((res) => {
-      setBusiness(res);
-    });
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        setBusiness(res);
+      });
   }
-
 
   function swipeLeft() {
     if (resultIds.length > 1) {
       setResultIds((p) => {
-        const newP = p.filter((id) => id !== business.id)
-        newBusiness(newP[0])
-        return newP
+        const newP = p.filter((id) => id !== business.id);
+        newBusiness(newP[0]);
+        return newP;
       });
-      
-
     } else {
       setBusiness(undefined);
       setResultIds([]);
@@ -287,30 +294,31 @@ const Home: NextPage = () => {
                 onClick={handleSelectLocation}
                 onBoundsChanged={({ center, zoom }) => {
                   centerRef.current = center;
-                  zoomRef.current =zoom;
+                  zoomRef.current = zoom;
                 }}
               >
-                {business && results &&
+                {business &&
+                  results &&
                   results
                     .slice()
                     .reverse()
-                    .map((result) => (resultIds.includes(result.id) && (
-                      <Marker
-                        key={result.id}
-                        color={
-                          result.id ===
-                          business.id
-                            ? "salmon"
-                            : "lightblue"
-                        }
-                        width={50}
-                        anchor={[
-                          result.coordinates.latitude,
-                          result.coordinates.longitude,
-                        ]}
-                        onClick={() => newBusiness(result.id)}
-                      />
-                    )))}
+                    .map(
+                      (result) =>
+                        resultIds.includes(result.id) && (
+                          <Marker
+                            key={result.id}
+                            color={
+                              result.id === business.id ? "salmon" : "lightblue"
+                            }
+                            width={50}
+                            anchor={[
+                              result.coordinates.latitude,
+                              result.coordinates.longitude,
+                            ]}
+                            onClick={() => newBusiness(result.id)}
+                          />
+                        )
+                    )}
               </Map>
             }
           </div>
@@ -356,12 +364,13 @@ const Home: NextPage = () => {
                         </p>
                         <p className="">
                           {results[results.length - resultIds.length]
-                              .distance && Math.round(
-                            (results[results.length - resultIds.length]
-                              .distance /
-                              1609) *
-                              100
-                          ) / 100}{" "}
+                            .distance &&
+                            Math.round(
+                              (results[results.length - resultIds.length]
+                                .distance /
+                                1609) *
+                                100
+                            ) / 100}{" "}
                           miles away
                         </p>
                         <div className="flex items-center justify-between">
