@@ -152,8 +152,7 @@ const Home: NextPage = () => {
         filterTaps: true,
         preventScroll: true,
         axis: "x",
-      },
-      scroll: {  enabled: true, axis:"y" },
+      }
     }
   );
   useEffect(() => {
@@ -332,9 +331,8 @@ const Home: NextPage = () => {
                     x,
                     rotate,
                     scale,
-                    touchAction: "none",
                   }}
-                  className="z-10 flex h-full w-[300px] touch-none flex-col items-center justify-start rounded-2xl bg-stone-50 p-2 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
+                  className="z-10 flex h-full w-[300px] flex-col items-center justify-start rounded-2xl bg-stone-50 p-2 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
                   key={datum.id}
                   {...bind()}
                 >
