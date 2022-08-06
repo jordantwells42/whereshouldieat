@@ -2,20 +2,18 @@
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
-
-import { useDrag, useGesture } from "@use-gesture/react";
-import { stamenToner } from "pigeon-maps/providers";
-import debounce from "lodash.debounce";
+import { Carousel } from 'react-responsive-carousel';
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import { useGesture } from "@use-gesture/react";
 import { useSpring, animated, config } from "react-spring";
 import { motion } from "framer-motion";
 import { DebounceInput } from "react-debounce-input";
 import FoodIcons from "../components/FoodIcons";
 import StarRatings from "react-star-ratings";
 import Link from "next/link";
-import Swipeable from "../components/Swipeable";
-import { setMaxListeners } from "stream";
+
 
 function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
@@ -63,6 +61,8 @@ const Home: NextPage = () => {
   const [tab, setTab] = useState(0);
   const [foodQuery, setFoodQuery] = useState("");
   const [results, setResults] = useState<Results>([]);
+  const [resultIds, setResultIds] = useState<number[]>([]);
+  const [business, setBusiness] = useState<Result>(undefined);
   const router = useRouter();
   const [firstLoad, setFirstLoad] = useState(true);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
@@ -176,15 +176,22 @@ const Home: NextPage = () => {
   function search(locationStr: string, foodStr: string) {
     fetch(
       `/api/search-area?q=${foodStr || "food"}&l=${
-        locationStr || location[0] + "," + location[1]
+        location[0] + "," + location[1]
       }`
     )
       .then((res) => {
         return res.json();
       })
       .then((res) => {
-        console.log(res);
+        setResultIds(res.businesses.map((r: Result) => r.id));
         setResults(res.businesses);
+        fetch(`/api/business?id=${res.businesses[0].id}`)
+          .then((res) => {
+            return res.json();
+          })
+          .then((res) => {
+            setBusiness(res);
+          });
         setLocation([res.region.center.latitude, res.region.center.longitude]);
         setCenter([res.region.center.latitude, res.region.center.longitude]);
         setZoom(maxZoom);
@@ -217,17 +224,30 @@ const Home: NextPage = () => {
     setZoom(maxZoom);
   }
   function swipeLeft() {
-    setResults((p) => p.slice(1));
+    if (resultIds.length > 1) {
+      fetch(`/api/business?id=${resultIds[resultIds.indexOf(business.id) + 1]}`)
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          setBusiness(res);
+        });
+        setResultIds((p) => p.slice(1));
+    } else {
+      setBusiness(undefined)
+      setResultIds([]);
+    }
+    
   }
 
   function swipeRight() {
     router.push(
       `https://www.google.com/maps/dir/${location.join(",")}/${
-        results[0].coordinates.latitude
-      },${results[0].coordinates.longitude}`
+        business.coordinates.latitude
+      },${business.coordinates.longitude}`
     );
   }
-
+  console.log(business)
   return (
     <>
       <Head>
@@ -250,10 +270,10 @@ const Home: NextPage = () => {
               <Map
                 provider={tiler}
                 center={
-                  results && results[0]
+                  business
                     ? [
-                        results[0].coordinates.latitude,
-                        results[0].coordinates.longitude,
+                        business.coordinates.latitude,
+                        business.coordinates.longitude,
                       ]
                     : center
                 }
@@ -267,13 +287,13 @@ const Home: NextPage = () => {
               >
                 {results &&
                   results
-                    .slice()
+                    .slice(results.length - resultIds.length)
                     .reverse()
                     .map((result) => (
                       <Marker
                         key={result.id}
                         color={
-                          result.id === results[0].id ? "salmon" : "lightblue"
+                          result.id === results[results.length - resultIds.length].id ? "salmon" : "lightblue"
                         }
                         width={50}
                         anchor={[
@@ -286,8 +306,8 @@ const Home: NextPage = () => {
               </Map>
             }
           </div>
-          {results && !toggle && results[0] ? (
-            [results[0]].map((datum: any, idx: number) => {
+          {!toggle && business ? (
+            [business].map((datum: any, idx: number) => {
               return (
                 <animated.div
                   style={{
@@ -298,26 +318,34 @@ const Home: NextPage = () => {
                     scale,
                     touchAction: "none",
                   }}
-                  className="z-10 flex h-full w-[300px] touch-none flex-col items-center justify-start rounded-2xl bg-sky-50 p-2 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
+                  className="z-10 flex h-full w-[300px] touch-none flex-col items-center justify-start rounded-2xl bg-stone-50 p-2 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
                   key={datum.id}
                   {...bind()}
                 >
                   <div className="flex w-5/6 flex-col items-center justify-start">
-                    <div className="relative m-4 mb-0 flex w-full flex-col items-center justify-start">
-                      <img
-                        className="aspect-square rounded-2xl object-cover"
-                        src={datum.image_url}
+                    <div className="relative m-4 mb-0 flex w-full aspect-square flex-col items-center justify-start">
+                    <Carousel showThumbs={false} className="absolute bottom-0 w-full aspect-square">
+                    {datum.photos.map((photo:string) => {
+                      return (
+
+                        <img
+                        className="object-cover w-full aspect-square rounded-2xl  "
+                        key={photo}
+                        src={photo}
                         alt={datum.name}
-                      />
+                      />)
+                      })
+                      }
+                      </Carousel>
                       <div className="absolute bottom-0  flex h-3/4 w-full  items-center rounded-2xl bg-gradient-to-t from-stone-900"></div>
-                      <div className="absolute bottom-0  flex w-full flex-col justify-start p-4 text-left text-white">
+                      <div className="absolute bottom-5  flex w-full flex-col justify-start p-4 text-left text-white">
                         <p className="gap-2 align-middle">
                           <b className="text-lg font-bold">{datum.name}</b>
                           &nbsp;&nbsp;
                           <i className="font-light">{datum.price}</i>
                         </p>
                         <p className="">
-                          {Math.round((datum.distance / 1609) * 100) / 100}{" "}
+                          {Math.round((results[results.length - resultIds.length].distance / 1609) * 100) / 100}{" "}
                           miles away
                         </p>
                         <div className="flex items-center justify-between">
@@ -337,7 +365,16 @@ const Home: NextPage = () => {
                         </div>
                       </div>
                     </div>
-
+                    <div className="z-20 mb-4 flex w-full justify-center gap-4">
+                      <Link href={datum.url}>
+                        <a rel="noreferrer noopener" target="_blank">
+                          <img alt="yelp" className="h-8 rounded-lg" src={"yelp.svg"} />
+                        </a>
+                      </Link>
+                      <button onClick={swipeRight}>
+                        <img alt="maps" className="h-8 rounded-lg" src={"maps.svg"} />
+                      </button>
+                    </div>
                     <div className="m-5 w-full">
                       <p className="italic">
                         {datum.categories.map((c: any) => c.title).join(" | ")}
