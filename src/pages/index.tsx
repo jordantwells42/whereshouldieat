@@ -187,9 +187,10 @@ const Home: NextPage = () => {
                 }}
               >
                 {results &&
-                  results.map((result) => (
+                  results.slice().reverse().map((result) => (
                     <Marker
                       key={result.id}
+                      color={result.id === results[0].id ? "salmon" : "lightblue"}
                       width={50}
                       anchor={[
                         result.coordinates.latitude,
