@@ -138,7 +138,11 @@ const Home: NextPage = () => {
             if (!windowSize || !windowSize.width) {
               return;
             }
-            const x = !down ? 0 : trigger ? mx * 1 : mx;
+            const x = !down
+              ? 0
+              : windowSize.width < 500
+              ? mx * 1.5
+              : mx;
             const rotate = !down
               ? 0
               : windowSize.width < 500
@@ -389,14 +393,16 @@ useEffect(() => {
                     scale,
                     touchAction: "pan-y",
                   }}
-                  className="z-10 flex h-full w-[400px] flex-col items-center justify-start rounded-2xl bg-stone-50 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
+                  className="z-10 flex h-full w-[400px] flex-col items-center justify-start rounded-2xl bg-white text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
                   key={datum.id}
                   {...bind()}
                 >
                   {datum.hours && datum.hours[0] ? (
                     <div
                       className={`text-center text-xl font-bold text-white ${
-                        datum.hours[0].is_open_now ? "bg-green-500" : "bg-red-500"
+                        datum.hours[0].is_open_now
+                          ? "bg-green-500"
+                          : "bg-red-500"
                       } w-full rounded-t-2xl`}
                     >
                       {datum.hours[0].is_open_now ? "OPEN" : "CLOSED"}
@@ -410,8 +416,8 @@ useEffect(() => {
                       {datum.hours.is_open_now ? "OPEN" : "CLOSED"}
                     </div>
                   )}
+                  {/* IMAGES */}
                   <div className="flex w-5/6 flex-col items-center justify-start">
-                    {datum.hours.is_open_now}
                     <div className="relative m-4 mb-0 flex aspect-square w-full flex-col items-center justify-start">
                       <Carousel
                         showThumbs={false}
@@ -448,7 +454,7 @@ useEffect(() => {
                           miles away
                         </p>
                         <div className="flex items-center justify-between">
-                          <div className="align-center flex h-8 w-full items-center justify-center gap-2">
+                          <div className="align-center flex h-8 w-full items-center justify-start gap-2">
                             <StarRatings
                               rating={datum.rating}
                               starRatedColor="gold"
@@ -464,7 +470,7 @@ useEffect(() => {
                         </div>
                       </div>
                     </div>
-
+                    {/* LINKS */}
                     <div className="z-20 mb-4 flex w-full justify-center gap-4">
                       <Link href={datum.url}>
                         <a rel="noreferrer noopener" target="_blank">
@@ -492,31 +498,43 @@ useEffect(() => {
                       </Link>
                     </div>
 
+                    {/* INFO */}
                     <div className="m-3 w-full">
-                      <p className="italic">
+                      <p className="font-semibold italic">
                         {datum.categories.map((c: any) => c.title).join(" | ")}
                       </p>
                       <p>{datum.display_phone}</p>
                       <p>{datum.location.display_address.join("\n")}</p>
                     </div>
 
-                    <div className="m-3 w-full">
-                      Today&apos;s hours:&nbsp;
-                      {datum.hours[0].open
-                        .filter((e: any) => e.day === day)
-                        .map(
-                          (hour: any) =>
-                            `${
-                              hour.start.slice(0, -2) +
-                              ":" +
-                              hour.start.slice(-2)
-                            } - ${
-                              hour.end.slice(0, -2) + ":" + hour.end.slice(-2)
-                            } `
-                        )}
+                    {/* HOURS */}
+                    <div className="m-3 w-full ">
+                      {(() => {
+                        const hoursString = datum.hours[0].open
+                          .filter((e: any) => e.day === day)
+                          .map(
+                            (hour: any) =>
+                              `Open from ${
+                                hour.start.slice(0, -2) +
+                                ":" +
+                                hour.start.slice(-2)
+                              } to ${
+                                hour.end.slice(0, -2) + ":" + hour.end.slice(-2)
+                              } `
+                          )
+                          .join("and ");
+                        return (
+                          <p>
+                            {hoursString
+                              ? hoursString + " today"
+                              : "Closed today"}
+                          </p>
+                        );
+                      })()}
                     </div>
-
-                    <div className="flex w-full items-center justify-between ">
+                    
+                    {/* BUTTONS */}
+                    <div className="flex w-full items-center justify-between m-3">
                       <button onClick={swipeLeft}>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
