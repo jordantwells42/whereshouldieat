@@ -3,9 +3,11 @@ import {motion} from 'framer-motion'
 export default function FoodIcons({
   setFoodQuery,
   setToggle,
+  search
 }: {
   setFoodQuery: (query: string) => void;
   setToggle: (toggle: boolean) => void;
+  search: (locationStr: string, foodStr: string) => void;
 }) {
   const foods = [
     "Pizza",
@@ -43,7 +45,7 @@ export default function FoodIcons({
             src={`/${food}.svg`}
             alt={food}
             className="h-full aspect-square"
-            onClick={() => (setFoodQuery(food), setToggle(false))}
+            onClick={() => (search("", food), setFoodQuery(food), setToggle(false))}
           />
           <p className="text-sm font-bold">{food}</p>
         </motion.div>

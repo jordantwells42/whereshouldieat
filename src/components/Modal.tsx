@@ -29,9 +29,11 @@ function useWindowSize() {
 export default function Modal({
   children,
   toggle,
+  setToggle,
 }: {
   children: React.ReactNode;
   toggle: boolean;
+  setToggle: (toggle: boolean) => void;
 }) {
   const windowSize = useWindowSize();
   return (
@@ -43,7 +45,7 @@ export default function Modal({
             ? (windowSize.height * 3) / 4
             : windowSize.height,
       }}
-      className="absolute top-0 z-20 w-full bg-stone-50 md:top-20 md:w-3/4 md:rounded-2xl"
+      className="absolute top-0 w-full bg-stone-50 md:top-20 md:w-3/4 md:rounded-2xl"
     >
       <div className="relative flex h-full w-full flex-col items-center justify-start text-lg">
         {children}
