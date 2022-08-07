@@ -18,7 +18,8 @@
     "react-dom": "18.2.0",
     "react-responsive-carousel": "^3.2.23",
     "react-spring": "^9.5.2",
-    "react-star-ratings": "^2.3.0"
+    "react-star-ratings": "^2.3.0",
+    "react-use-measure": "^2.1.1"
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.7",

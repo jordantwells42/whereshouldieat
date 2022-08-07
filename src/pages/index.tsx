@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Router, { useRouter } from "next/router";
-
+import useMeasure from 'react-use-measure'
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
@@ -99,7 +99,7 @@ type Results = Result[];
 
 const Home: NextPage = () => {
   const maxZoom = 14;
-
+  const [ref, bounds] = useMeasure()
   const windowSize = useWindowSize();
   const [toggle, setToggle] = useQueryState("toggle", true);
   const [tab, setTab] = useQueryState("tab", 0);
@@ -327,13 +327,13 @@ useEffect(() => {
   return (
     <>
       <div
-        style={{ backgroundBlendMode: toggle ? "darken" : "" }}
-        className="relative flex h-full min-h-screen w-full flex-col items-center justify-center bg-stone-700  font-main"
+        style={{ height: "100%", backgroundBlendMode: toggle ? "darken" : ""}}
+        className="relative flex min-h-screen w-full flex-col items-center justify-center bg-stone-700  font-main"
       >
         {/*TINDER*/}
         <div className="relative min-h-screen flex h-full w-full flex-col items-center justify-center overflow-x-hidden overflow-y-hidden">
           <div
-            style={{ height: windowSize.height }}
+            style={{ height: windowSize.height , marginBottom: (bounds.height - windowSize.height + 110 > 0) ? bounds.height - windowSize.height + 110 : 0 }}
             className="flex w-full items-center justify-center "
           >
             {
@@ -386,12 +386,13 @@ useEffect(() => {
                   key={datum.id}
                   initial={{ y: 100 }}
                   animate={{ y: 0 }}
-                  className="z-10 flex h-full w-[400px] flex-col items-center text-lg lg:text-xl justify-center rounded-2xl  text-stone-900 md:w-[400px] xl:absolute xl:top-20 xl:left-20  xl:mt-0 xl:h-auto lg:w-[425px] 2xl:w-[500px]"
+                  ref={ref}
+                  className="z-10 flex h-full w-[400px] flex-col items-center text-lg md:text-lg lg:text-xl justify-center rounded-2xl  text-stone-900 md:w-[400px] lg:absolute lg:top-10 lg:left-20  lg:mt-0 lg:h-auto  lg:w-[425px] xl:w-[500px] 2xl:w-[600px]"
                 >
                   <animated.div
                     style={{
                       marginTop:
-                        windowSize.width >= 1280 ? 0 : -windowSize.height / 2.2,
+                        windowSize.width >= 1024 ? 0 : -windowSize.height / 2.2,
                       x,
                       rotate,
                       scale,
@@ -586,7 +587,7 @@ useEffect(() => {
           )}
 
           <button
-            className="my-8 mb-24 flex h-10 items-center justify-center rounded-2xl bg-stone-500 p-4 text-white"
+            className={`my-8 ${toggle ? "" : "mb-24"} flex h-10 xl:absolute xl:top-5 xl:right-5 items-center justify-center rounded-2xl bg-stone-500 p-4 text-white`}
             onClick={() => (setTab(1), setToggle(true))}
           >
             Change up your search
@@ -737,7 +738,7 @@ useEffect(() => {
             </Modal>
           )}
         </AnimatePresence>
-        <Footer />
+        {!toggle && <Footer />}
       </div>
     </>
   );
