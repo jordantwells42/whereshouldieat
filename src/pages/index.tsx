@@ -328,7 +328,7 @@ useEffect(() => {
     <>
       <div
         style={{ backgroundBlendMode: toggle ? "darken" : "" }}
-        className="relative flex w-full flex-col items-center justify-center bg-stone-700  font-main"
+        className="relative flex h-full w-full flex-col items-center justify-center bg-stone-700  font-main"
       >
         {/*TINDER*/}
         <div className="relative flex h-full w-full flex-col items-center justify-center overflow-x-hidden overflow-y-hidden">
