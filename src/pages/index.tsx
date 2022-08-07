@@ -8,7 +8,7 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { useGesture } from "@use-gesture/react";
 import { useSpring, animated, config } from "react-spring";
-import { m, motion } from "framer-motion";
+import { AnimatePresence, m, motion } from "framer-motion";
 import { DebounceInput } from "react-debounce-input";
 import FoodIcons from "../components/FoodIcons";
 import StarRatings from "react-star-ratings";
@@ -500,9 +500,14 @@ const Home: NextPage = () => {
           }}
           className="absolute top-0 z-20 w-full bg-stone-50 md:top-20 md:w-3/4 md:rounded-2xl"
         >
+          <AnimatePresence>
           {/*WHERE*/}
           {tab == 0 && (
-            <div className="relative flex h-full w-full flex-col items-center justify-start text-lg">
+            <motion.div
+            initial={{x:1000}}
+            exit={{x:1000}}
+            animate={{x:0}}  
+            className="relative flex h-full w-full flex-col items-center justify-start text-lg">
               <div className="h-1/2 w-full">
                 <Map
                   provider={tiler}
@@ -528,7 +533,7 @@ const Home: NextPage = () => {
                   <b className="italic">Where</b> are you eating?
                 </h2>
                 <DebounceInput
-                  className="w-5/6 rounded-2xl border-2 border-black p-2"
+                  className="w-5/6 rounded-2xl border-2 border-black p-2 focus:outline-blue-400"
                   value={locationQuery}
                   placeholder="Downtown Austin"
                   debounceTimeout={200}
@@ -557,11 +562,15 @@ const Home: NextPage = () => {
                   />
                 </svg>
               </button>
-            </div>
+            </motion.div>
           )}
           {/*WHAT*/}
           {tab == 1 && (
-            <div className="relative flex h-full w-full flex-col items-center justify-center">
+            <motion.div
+            initial={{x:-1000}}
+            exit={{x:1000}}
+            animate={{x:0}} 
+            className="relative flex h-full w-full flex-col items-center justify-center">
               <div className="z-10 flex h-full w-full flex-col items-center justify-start text-lg">
                 <div className="h-1/2 w-full">
                   <FoodIcons
@@ -574,7 +583,7 @@ const Home: NextPage = () => {
                     <b className="italic">What</b>&nbsp;are you craving?
                   </h2>
                   <DebounceInput
-                    className="w-5/6 rounded-2xl border-2 border-black p-2"
+                    className="w-5/6 rounded-2xl border-2 border-black p-2 focus:outline-blue-400"
                     value={foodQuery}
                     placeholder="Pizza"
                     debounceTimeout={200}
@@ -623,8 +632,9 @@ const Home: NextPage = () => {
                   </svg>
                 </button>
               </div>
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
       </div>
     </>

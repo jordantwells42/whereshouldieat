@@ -1,3 +1,5 @@
+import {motion} from 'framer-motion'
+
 export default function FoodIcons({
   setFoodQuery,
   setToggle,
@@ -32,7 +34,11 @@ export default function FoodIcons({
   return (
     <div className="w-full h-full grid grid-rows-2  grid-flow-col overflow-x-scroll overflow-y-hidden pt-10 pl-5 md:pl-10 ">
       {foods.map((food, index) => (
-        <div className="w-20 h-20 hover:cursor-pointer hover:bg-blue-50 hover:rounded-2xl p-1 flex flex-col items-center justify-center" key={index}>
+        <motion.div
+        initial={{rotate:0}}
+        animate={{rotate:0}}
+        whileHover={{rotate:[5,-5,0], scale:1.1}} 
+        className="w-20 h-20 hover:cursor-pointer hover:bg-blue-50 hover:rounded-2xl p-1 flex flex-col items-center justify-center" key={index}>
           <img
             src={`/${food}.svg`}
             alt={food}
@@ -40,7 +46,7 @@ export default function FoodIcons({
             onClick={() => (setFoodQuery(food), setToggle(false))}
           />
           <p className="text-sm font-bold">{food}</p>
-        </div>
+        </motion.div>
       ))}
     </div>
   );
