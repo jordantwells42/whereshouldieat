@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
+
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +15,31 @@ import FoodIcons from "../components/FoodIcons";
 import StarRatings from "react-star-ratings";
 import Link from "next/link";
 import Modal from "../components/Modal";
+
+function useQueryState(name: string, defaultValue: any){
+  const router = useRouter();
+  const [value, setQueryValue] = useState(defaultValue);
+  
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const value = query.get(name);
+    if (value) {
+      setValue(JSON.parse(value));
+    } else {
+      setValue(defaultValue);
+    }
+  }, [router.query[name]]);
+
+  function setValue(value: any) {
+    const query = new URLSearchParams(window.location.search);
+    query.set(name, JSON.stringify(value));
+    router.push(`?${query.toString()}`);
+    setQueryValue(value);
+  }
+
+  return [value, setValue];
+}
+
 
 function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
@@ -59,7 +85,7 @@ const Home: NextPage = () => {
   const [initX, setInitX] = useState(0);
   const [toggle, setToggle] = useState(true);
   const [tab, setTab] = useState(0);
-  const [foodQuery, setFoodQuery] = useState("");
+  const [foodQuery, setFoodQuery] = useQueryState("food", "");
   const [results, setResults] = useState<Results>([]);
   const [resultIds, setResultIds] = useState<string[]>([]);
   const [business, setBusiness] = useState<Result>(undefined);
@@ -67,7 +93,7 @@ const Home: NextPage = () => {
   const [firstLoad, setFirstLoad] = useState(true);
   const centerRef = useRef<[number, number]>([40.7812, -73.9665]);
   const zoomRef = useRef<number>(maxZoom);
-  const [location, setLocation] = useState<[number, number]>([
+  const [location, setLocation] = useQueryState("location", [
     40.7812, -73.9665,
   ]);
   const [locationQuery, setLocationQuery] = useState("");
@@ -159,6 +185,11 @@ const Home: NextPage = () => {
       },
     }
   );
+
+  useEffect(() => {
+    centerRef.current = location;
+  }, [location])
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((e) => {
@@ -263,20 +294,13 @@ const Home: NextPage = () => {
         business.coordinates.longitude
       },15z`
     );
-    /*
-    router.push(
-      `https://www.google.com/maps/dir/${location.join(",")}/${
-        business.coordinates.latitude
-      },${business.coordinates.longitude}`
-    );
-    */
   }
 
   return (
     <>
       <div
         style={{ backgroundBlendMode: toggle ? "darken" : "" }}
-        className="font-main relative flex h-full w-full flex-col items-center justify-center  bg-stone-700"
+        className="relative flex h-full w-full flex-col items-center justify-center bg-stone-700  font-main"
       >
         {/*TINDER*/}
         <div className="relative flex h-full w-full flex-col items-center justify-center overflow-x-hidden">
@@ -465,14 +489,16 @@ const Home: NextPage = () => {
                 </animated.div>
               );
             })
-          ) : toggle ? <></> : resultIds.length === 0  ?(
+          ) : toggle ? (
+            <></>
+          ) : resultIds.length === 0 ? (
             <button
               className="z-20 my-10 -mt-40 flex h-20 w-full items-center justify-center rounded-2xl bg-stone-500 p-4 text-white lg:absolute lg:top-20 lg:left-20 lg:mt-0 lg:w-1/4"
               onClick={() => (setToggle(true), setTab(1))}
             >
               Didn&apos;t find your Craving?
             </button>
-          )   : (
+          ) : (
             <div className="z-20 my-10 -mt-40 flex h-20 w-full items-center justify-center rounded-2xl bg-stone-500 p-4 text-white lg:absolute lg:top-20 lg:left-20 lg:mt-0 lg:w-1/4">
               Loading
             </div>
@@ -491,13 +517,11 @@ const Home: NextPage = () => {
         </div>
 
         {/*MDOAL */}
-       
-          <AnimatePresence>
+
+        <AnimatePresence>
           {/*WHERE*/}
           {tab == 0 && (
             <Modal toggle={toggle}>
- 
-            
               <div className="h-1/2 w-full">
                 <Map
                   provider={tiler}
@@ -551,7 +575,8 @@ const Home: NextPage = () => {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </button></Modal>
+              </button>
+            </Modal>
           )}
           {/*WHAT*/}
           {tab == 1 && (
@@ -617,10 +642,9 @@ const Home: NextPage = () => {
                   </svg>
                 </button>
               </div>
-</Modal>
+            </Modal>
           )}
-          </AnimatePresence>
-        
+        </AnimatePresence>
       </div>
     </>
   );
