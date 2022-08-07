@@ -267,6 +267,7 @@ useEffect(() => {
     latLng: [number, number];
   }) {
     centerRef.current = latLng;
+    
     setLocation(latLng);
   }
 
@@ -361,7 +362,7 @@ useEffect(() => {
                             result.coordinates.latitude,
                             result.coordinates.longitude,
                           ]}
-                          onClick={() => newBusiness(result.id)}
+                          onClick={() => (zoomRef.current = maxZoom, newBusiness(result.id))}
                         />
                       )
                   )}
