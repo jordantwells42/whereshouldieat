@@ -16,74 +16,77 @@ import StarRatings from "react-star-ratings";
 import Link from "next/link";
 import Modal from "../components/Modal";
 
-function useQueryState(name: string, defaultValue: any, callback: (value: any) => void = () => {}) {
+function useQueryState(
+  name: string,
+  defaultValue: any,
+  callback: (value: any) => void = () => {}
+) {
   const router = useRouter();
   const [value, setQueryValue] = useState(defaultValue);
   //const [firstLoad, setFirstLoad] = useState(true);
-  
-
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     const qvalue = query.get(name);
+    console.log(qvalue, name);
 
-    if (value === qvalue){
-      return
-    }
-
-    
     if (qvalue) {
-      callback(JSON.parse(qvalue))
+      if (JSON.parse(qvalue) === value || JSON.parse(qvalue) == defaultValue) {
+        return;
+      }
+      callback(JSON.parse(qvalue));
       setQueryValue(JSON.parse(qvalue));
     } else if (defaultValue == "") {
-      callback(defaultValue);
+      //callback(defaultValue);
       setQueryValue(defaultValue);
     } else {
       //callback(defaultValue)
+      if (name === "location") {
+        return;
+      }
       setQueryValue(defaultValue);
     }
   }, [router.query[name]]);
 
-  function setValue(value: any) {
-    console.log("SETTING STATE OF ", name, "to", value);
+  function setValue(qvalue: any) {
+    if (qvalue == value) {
+      return;
+    }
+
+    console.log("SETTING STATE OF ", name, "to", qvalue);
     const query = new URLSearchParams(window.location.search);
-    query.set(name, JSON.stringify(value) || "");
+    query.set(name, JSON.stringify(qvalue) || "");
     router.push(`?${query.toString()}`);
-    setQueryValue(value);
+    setQueryValue(qvalue);
   }
 
   return [value, setValue];
 }
-
 
 function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
 }
 
 function useWindowSize() {
-  // Initialize state with undefined width/height so server and client renders match
-  // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
   const [windowSize, setWindowSize] = useState({
     width: 1080,
     height: 720,
   });
 
   useEffect(() => {
-    // Handler to call on window resize
     function handleResize() {
-      // Set window width/height to state
       setWindowSize({
         width: window.innerWidth,
         height: window.innerHeight,
       });
     }
-    // Add event listener
+
     //window.addEventListener("resize", handleResize);
-    // Call handler right away so state gets updated with initial window size
+
     handleResize();
-    // Remove event listener on cleanup
+
     //return () => window.removeEventListener("resize", handleResize);
-  }, []); // Empty array ensures that effect is only run on mount
+  }, []);
   return windowSize;
 }
 
@@ -100,7 +103,9 @@ const Home: NextPage = () => {
   const [initX, setInitX] = useState(0);
   const [toggle, setToggle] = useQueryState("toggle", true);
   const [tab, setTab] = useQueryState("tab", 0);
-  const [foodQuery, setFoodQuery] = useQueryState("food", "", (val) => search("", val));
+  const [foodQuery, setFoodQuery] = useQueryState("food", "", (val) =>
+    search("", val)
+  );
   const [results, setResults] = useState<Results>([]);
   const [resultIds, setResultIds] = useState<string[]>([]);
   const [business, setBusiness] = useState<Result>(undefined);
@@ -108,7 +113,10 @@ const Home: NextPage = () => {
   const [firstLoad, setFirstLoad] = useState(true);
   const centerRef = useRef<[number, number]>([40.7812, -73.9665]);
   const zoomRef = useRef<number>(maxZoom);
-  const [location, setLocation] = useQueryState("location", [40.7812, -73.9665]);
+  const [location, setLocation] = useQueryState(
+    "location",
+    [40.7812, -73.9665]
+  );
   const [locationQuery, setLocationQuery] = useState("");
   const [dprs, setDprs] = useState<number>(1);
 
@@ -199,24 +207,26 @@ const Home: NextPage = () => {
     }
   );
 
-
   useEffect(() => {
     if (navigator.geolocation) {
       try {
-      navigator.geolocation.getCurrentPosition((e) => {
-        setLocation([e.coords.latitude, e.coords.longitude]);
-        centerRef.current = [e.coords.latitude, e.coords.longitude];
-      });
-    } catch (e) {
-      setLocation([40.7812, -73.9665]);
-      centerRef.current = [40.7812, -73.9665];
-    }
+        navigator.geolocation.getCurrentPosition((e) => {
+          setLocation([e.coords.latitude, e.coords.longitude]);
+          centerRef.current = [e.coords.latitude, e.coords.longitude];
+          search([e.coords.latitude, e.coords.longitude].join(","), "");
+        });
+      } catch (e) {
+        setLocation([40.7812, -73.9665]);
+        centerRef.current = [40.7812, -73.9665];
+        search([40.7812, -73.9665].join(","), "");
+      }
     } else {
       setLocation([40.7812, -73.9665]);
       centerRef.current = [40.7812, -73.9665];
+      search([40.7812, -73.9665].join(","), "");
     }
   }, []);
-/*
+  /*
 useEffect(() => {
   if (firstLoad) {
     setFirstLoad(false);
@@ -267,7 +277,7 @@ useEffect(() => {
     latLng: [number, number];
   }) {
     centerRef.current = latLng;
-    
+
     setLocation(latLng);
   }
 
@@ -308,14 +318,14 @@ useEffect(() => {
 
   function swipeRight() {
     router.push(
-      `https://www.google.com/maps/search/${business.name
+      `https://www.google.com/maps/dir/${location.join(",")}/${business.name
         .split(" ")
         .join("+")}/@${business.coordinates.latitude},${
         business.coordinates.longitude
       },15z`
     );
   }
-  console.log(location, centerRef.current)
+  console.log(location, centerRef.current);
   return (
     <>
       <div
@@ -362,7 +372,9 @@ useEffect(() => {
                             result.coordinates.latitude,
                             result.coordinates.longitude,
                           ]}
-                          onClick={() => (zoomRef.current = maxZoom, newBusiness(result.id))}
+                          onClick={() => (
+                            (zoomRef.current = maxZoom), newBusiness(result.id)
+                          )}
                         />
                       )
                   )}
@@ -448,11 +460,11 @@ useEffect(() => {
                         </a>
                       </Link>
                       <Link
-                        href={`https://www.google.com/maps/search/${business.name
-                          .split(" ")
-                          .join("+")}/@${business.coordinates.latitude},${
-                          business.coordinates.longitude
-                        },15z`}
+                        href={`https://www.google.com/maps/dir/${location.join(
+                          ","
+                        )}/${business.name.split(" ").join("+")}/@${
+                          business.coordinates.latitude
+                        },${business.coordinates.longitude},15z`}
                       >
                         <a rel="noreferrer noopener" target="_blank">
                           <img
@@ -576,15 +588,15 @@ useEffect(() => {
                     search(e.target.value, foodQuery),
                   ]}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      (setTab(1))
+                    if (e.key === "Enter") {
+                      setTab(1);
                     }
                   }}
                 />
               </div>
               <button
                 className="absolute bottom-5 right-5 h-1/4"
-                onClick={() => (setTab(1))}
+                onClick={() => setTab(1)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -609,7 +621,7 @@ useEffect(() => {
               <div className="z-10 flex h-full w-full flex-col items-center justify-start text-lg">
                 <div className="h-1/2 w-full">
                   <FoodIcons
-                  search={search}
+                    search={search}
                     setToggle={setToggle}
                     setFoodQuery={setFoodQuery}
                   />
@@ -628,8 +640,8 @@ useEffect(() => {
                       search("", e.target.value),
                     ]}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        (setTab(0), setToggle(false))
+                      if (e.key === "Enter") {
+                        setTab(0), setToggle(false);
                       }
                     }}
                   />
