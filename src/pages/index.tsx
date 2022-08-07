@@ -13,6 +13,7 @@ import { DebounceInput } from "react-debounce-input";
 import FoodIcons from "../components/FoodIcons";
 import StarRatings from "react-star-ratings";
 import Link from "next/link";
+import Modal from "../components/Modal";
 
 function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
@@ -490,24 +491,13 @@ const Home: NextPage = () => {
         </div>
 
         {/*MDOAL */}
-        <div
-          style={{
-            display: toggle ? "block" : "none",
-            height:
-              windowSize.width > 700
-                ? (windowSize.height * 3) / 4
-                : windowSize.height,
-          }}
-          className="absolute top-0 z-20 w-full bg-stone-50 md:top-20 md:w-3/4 md:rounded-2xl"
-        >
+       
           <AnimatePresence>
           {/*WHERE*/}
           {tab == 0 && (
-            <motion.div
-            initial={{x:1000}}
-            exit={{x:1000}}
-            animate={{x:0}}  
-            className="relative flex h-full w-full flex-col items-center justify-start text-lg">
+            <Modal toggle={toggle}>
+ 
+            
               <div className="h-1/2 w-full">
                 <Map
                   provider={tiler}
@@ -561,16 +551,11 @@ const Home: NextPage = () => {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </button>
-            </motion.div>
+              </button></Modal>
           )}
           {/*WHAT*/}
           {tab == 1 && (
-            <motion.div
-            initial={{x:-1000}}
-            exit={{x:1000}}
-            animate={{x:0}} 
-            className="relative flex h-full w-full flex-col items-center justify-center">
+            <Modal toggle={toggle}>
               <div className="z-10 flex h-full w-full flex-col items-center justify-start text-lg">
                 <div className="h-1/2 w-full">
                   <FoodIcons
@@ -632,10 +617,10 @@ const Home: NextPage = () => {
                   </svg>
                 </button>
               </div>
-            </motion.div>
+</Modal>
           )}
           </AnimatePresence>
-        </div>
+        
       </div>
     </>
   );
