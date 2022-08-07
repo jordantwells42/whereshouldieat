@@ -736,8 +736,8 @@ useEffect(() => {
               </div>
             </Modal>
           )}
-        <Footer />
         </AnimatePresence>
+        <Footer />
       </div>
     </>
   );
