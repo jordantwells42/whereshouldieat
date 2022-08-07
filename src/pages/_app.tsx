@@ -24,7 +24,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <meta
       property='og:image'
       content={
-        '/jordan.webp'
+        '/logo.svg'
       }
     />
     <meta property='og:url' content={'https://whereshouldieat.app'} />
@@ -38,7 +38,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     />
     <meta
       name='twitter:image'
-      content='/jordan.webp'
+      content='/logo.svg'
     />
     <link rel="canonical" href={'https://whereshouldieat.app'} />
     <script type='application/ld+json'>{`
