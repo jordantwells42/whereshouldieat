@@ -333,7 +333,7 @@ useEffect(() => {
         {/*TINDER*/}
         <div className="relative min-h-screen flex h-full w-full flex-col items-center justify-center overflow-x-hidden overflow-y-hidden">
           <div
-            style={{ height: windowSize.height , marginBottom: (bounds.height - windowSize.height + 110 > 0) ? bounds.height - windowSize.height + 110 : 0 }}
+            style={{ height: windowSize.height , marginBottom: (bounds.height - windowSize.height + 100 > 0) ? bounds.height - windowSize.height + 100 : 0 }}
             className="flex w-full items-center justify-center "
           >
             {
@@ -529,6 +529,7 @@ useEffect(() => {
                       <div className="m-3 w-full">
                         <p>{datum.display_phone}</p>
                         <p>{datum.location.display_address.join("\n")}</p>
+                        <p className="capitalize">{datum.transactions.join(" | ")}</p>
                       </div>
 
                       {/* BUTTONS */}
@@ -575,7 +576,7 @@ useEffect(() => {
             <></>
           ) : resultIds.length === 0 ? (
             <button
-              className="z-20 my-10 -mt-40 flex h-20 w-full items-center justify-center rounded-2xl bg-stone-500 p-4 text-white lg:absolute lg:top-20 lg:left-20 lg:mt-0 lg:w-1/4"
+              className="z-20 my-10 -mt-40 flex h-20 w-full items-center justify-center rounded-2xl bg-stone-500 hover:bg-sky-500 p-4 text-white lg:absolute lg:top-20 lg:left-20 lg:mt-0 lg:w-1/4"
               onClick={() => (setToggle(true), setTab(1))}
             >
               Didn&apos;t find your Craving?
@@ -587,10 +588,10 @@ useEffect(() => {
           )}
 
           <button
-            className={`my-8 ${toggle ? "" : "mb-24"} flex h-10 xl:absolute xl:top-5 xl:right-5 items-center justify-center rounded-2xl bg-stone-500 p-4 text-white`}
+            className={`my-8 ${toggle ? "" : "mb-24"} flex h-10 xl:absolute xl:top-5 xl:right-5 items-center justify-center rounded-2xl hover:bg-sky-500 bg-stone-500 p-4 text-white`}
             onClick={() => (setTab(1), setToggle(true))}
           >
-            Change up your search
+            Cravings Changed?
           </button>
           <div
             style={{ display: toggle ? "block" : "none" }}
