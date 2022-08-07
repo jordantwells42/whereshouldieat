@@ -16,25 +16,25 @@ import StarRatings from "react-star-ratings";
 import Link from "next/link";
 import Modal from "../components/Modal";
 
-function useQueryState(name: string, defaultValue: any, callback: (value: any) => void) {
+function useQueryState(name: string, defaultValue: any, callback: (value: any) => void = () => {}) {
   const router = useRouter();
   const [value, setQueryValue] = useState(defaultValue);
-  const [firstLoad, setFirstLoad] = useState(true);
+  //const [firstLoad, setFirstLoad] = useState(true);
   
 
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
-    const value = query.get(name);
+    const qvalue = query.get(name);
 
-    if (firstLoad){
-      setFirstLoad(false);
+    if (value === qvalue){
       return
     }
+
     
-    if (value) {
-      callback(JSON.parse(value))
-      setQueryValue(JSON.parse(value));
+    if (qvalue) {
+      callback(JSON.parse(qvalue))
+      setQueryValue(JSON.parse(qvalue));
     } else if (defaultValue == "") {
       callback(defaultValue);
       setQueryValue(defaultValue);
@@ -45,7 +45,7 @@ function useQueryState(name: string, defaultValue: any, callback: (value: any) =
   }, [router.query[name]]);
 
   function setValue(value: any) {
-    console.log("SETTING STATE OF ", name)
+    console.log("SETTING STATE OF ", name, "to", value);
     const query = new URLSearchParams(window.location.search);
     query.set(name, JSON.stringify(value) || "");
     router.push(`?${query.toString()}`);
@@ -98,8 +98,8 @@ const Home: NextPage = () => {
   const [prevX, setPrevX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [initX, setInitX] = useState(0);
-  const [toggle, setToggle] = useState(true);
-  const [tab, setTab] = useState(0);
+  const [toggle, setToggle] = useQueryState("toggle", true);
+  const [tab, setTab] = useQueryState("tab", 0);
   const [foodQuery, setFoodQuery] = useQueryState("food", "", (val) => search("", val));
   const [results, setResults] = useState<Results>([]);
   const [resultIds, setResultIds] = useState<string[]>([]);
@@ -108,7 +108,7 @@ const Home: NextPage = () => {
   const [firstLoad, setFirstLoad] = useState(true);
   const centerRef = useRef<[number, number]>([40.7812, -73.9665]);
   const zoomRef = useRef<number>(maxZoom);
-  const [location, setLocation] = useQueryState("location", [40.7812, -73.9665], (val) => "");
+  const [location, setLocation] = useQueryState("location", [40.7812, -73.9665]);
   const [locationQuery, setLocationQuery] = useState("");
   const [dprs, setDprs] = useState<number>(1);
 
@@ -216,7 +216,7 @@ const Home: NextPage = () => {
       centerRef.current = [40.7812, -73.9665];
     }
   }, []);
-
+/*
 useEffect(() => {
   if (firstLoad) {
     setFirstLoad(false);
@@ -226,7 +226,7 @@ useEffect(() => {
     centerRef.current = location;
     search("", foodQuery)
   }
-}, [location])
+}, [location])*/
 
   function search(locationStr: string, foodStr: string) {
     fetch(
@@ -584,7 +584,7 @@ useEffect(() => {
               </div>
               <button
                 className="absolute bottom-5 right-5 h-1/4"
-                onClick={() => (setTab((p) => p + 1))}
+                onClick={() => (setTab(1))}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
