@@ -413,6 +413,7 @@ useEffect(() => {
                   <div className="flex w-5/6 flex-col items-center justify-start">
                     <div className="relative m-4 mb-0 flex aspect-square w-full flex-col items-center justify-start">
                       <Carousel
+                        swipeable={false}
                         showThumbs={false}
                         className="absolute bottom-0 aspect-square w-full"
                       >
