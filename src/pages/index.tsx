@@ -16,6 +16,7 @@ import StarRatings from "react-star-ratings";
 import Link from "next/link";
 import Modal from "../components/Modal";
 import { stringify } from "querystring";
+import Footer from "../components/Footer";
 
 const day = (new Date().getDay() + 6) % 7;
 
@@ -339,8 +340,7 @@ useEffect(() => {
             style={{ height: windowSize.height }}
             className="flex w-full items-center justify-center "
           >
-            {!toggle && 
-              <Map
+            {<Map
                 provider={tiler}
                 center={
                   business
@@ -584,7 +584,7 @@ useEffect(() => {
           )}
 
           <button
-            className="my-10 flex h-10 items-center justify-center rounded-2xl bg-stone-500 p-4 text-white"
+            className="my-10 mb-20 flex h-10 items-center justify-center rounded-2xl bg-stone-500 p-4 text-white"
             onClick={() => (setTab(1), setToggle(true))}
           >
             Change up your search
@@ -629,7 +629,7 @@ useEffect(() => {
                   className="w-5/6 rounded-2xl border-2 border-black p-2 focus:outline-blue-400"
                   value={locationQuery}
                   placeholder="Downtown Austin"
-                  debounceTimeout={200}
+                  debounceTimeout={300}
                   onChange={(e) => [
                     setLocationQuery(e.target.value),
                     search(e.target.value, foodQuery),
@@ -678,10 +678,10 @@ useEffect(() => {
                     <b className="italic">What</b>&nbsp;are you craving?
                   </h2>
                   <DebounceInput
-                    className="w-5/6 rounded-2xl border-2 border-black p-2 focus:outline-blue-400"
+                    className="w-5/6 rounded-2xl border-2 border-black p-2 focus:outline-sky-400"
                     value={foodQuery}
                     placeholder="Pizza"
-                    debounceTimeout={200}
+                    debounceTimeout={300}
                     onChange={(e) => [
                       setFoodQuery(e.target.value),
                       search("", e.target.value),
@@ -735,6 +735,7 @@ useEffect(() => {
             </Modal>
           )}
         </AnimatePresence>
+        <Footer />
       </div>
     </>
   );

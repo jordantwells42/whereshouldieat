@@ -63,6 +63,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           href="https://fonts.googleapis.com/css2?family=Poppins:ital@0;1&display=swap"
           rel="stylesheet"
         />
+        <link rel="icon" href="/logo.svg" />
   </Head>
   <Component {...pageProps} />
   </>
