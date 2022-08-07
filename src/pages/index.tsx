@@ -84,11 +84,11 @@ function useWindowSize() {
       });
     }
 
-    //window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize);
 
     handleResize();
 
-    //return () => window.removeEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
   return windowSize;
 }
@@ -325,7 +325,8 @@ useEffect(() => {
       },15z`
     );
   }
-  console.log(location, centerRef.current);
+  //console.log(location, centerRef.current);
+  console.log(business, business && business.hours)
   return (
     <>
       <div
@@ -393,29 +394,21 @@ useEffect(() => {
                     scale,
                     touchAction: "pan-y",
                   }}
-                  className="z-10 flex h-full w-[400px] flex-col items-center justify-start rounded-2xl bg-white text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
+                  className="z-10 flex h-full w-[400px] flex-col items-center justify-start rounded-2xl bg-stone-50 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
                   key={datum.id}
                   {...bind()}
                 >
-                  {datum.hours && datum.hours[0] ? (
+                  
                     <div
-                      className={`text-center text-xl font-bold text-white ${
-                        datum.hours[0].is_open_now
+                      className={`text-center text-xl font-bold text-stone-50 ${
+                        !datum.is_closed
                           ? "bg-green-500"
                           : "bg-red-500"
                       } w-full rounded-t-2xl`}
                     >
-                      {datum.hours[0].is_open_now ? "OPEN" : "CLOSED"}
+                      {!datum.is_closed ? "OPEN" : "CLOSED"}
                     </div>
-                  ) : (
-                    <div
-                      className={`text-center text-xl font-bold text-white ${
-                        datum.hours.is_open_now ? "bg-green-500" : "bg-red-500"
-                      } w-full rounded-t-2xl`}
-                    >
-                      {datum.hours.is_open_now ? "OPEN" : "CLOSED"}
-                    </div>
-                  )}
+                  
                   {/* IMAGES */}
                   <div className="flex w-5/6 flex-col items-center justify-start">
                     <div className="relative m-4 mb-0 flex aspect-square w-full flex-col items-center justify-start">
@@ -497,24 +490,24 @@ useEffect(() => {
                         </a>
                       </Link>
                     </div>
-
-                    {/* INFO */}
-                    <div className="m-3 w-full">
-                      <p className="font-semibold italic">
+                    <p className="w-full font-semibold italic">
                         {datum.categories.map((c: any) => c.title).join(" | ")}
                       </p>
+                    {/* INFO */}
+                    <div className="m-3 w-full">
+                      
                       <p>{datum.display_phone}</p>
                       <p>{datum.location.display_address.join("\n")}</p>
                     </div>
 
                     {/* HOURS */}
-                    <div className="m-3 w-full ">
+                    {datum.hours && <div className="m-3 w-full ">
                       {(() => {
                         const hoursString = datum.hours[0].open
                           .filter((e: any) => e.day === day)
                           .map(
                             (hour: any) =>
-                              `Open from ${
+                              `${
                                 hour.start.slice(0, -2) +
                                 ":" +
                                 hour.start.slice(-2)
@@ -526,12 +519,12 @@ useEffect(() => {
                         return (
                           <p>
                             {hoursString
-                              ? hoursString + " today"
+                              ? "Open from " + hoursString + " today"
                               : "Closed today"}
                           </p>
                         );
                       })()}
-                    </div>
+                    </div>}
                     
                     {/* BUTTONS */}
                     <div className="flex w-full items-center justify-between m-3">
