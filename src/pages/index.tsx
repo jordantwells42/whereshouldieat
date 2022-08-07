@@ -584,7 +584,7 @@ useEffect(() => {
           )}
 
           <button
-            className="my-10 mb-20 flex h-10 items-center justify-center rounded-2xl bg-stone-500 p-4 text-white"
+            className="my-8 mb-24 flex h-10 items-center justify-center rounded-2xl bg-stone-500 p-4 text-white"
             onClick={() => (setTab(1), setToggle(true))}
           >
             Change up your search
