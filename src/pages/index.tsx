@@ -386,12 +386,12 @@ useEffect(() => {
                   key={datum.id}
                   initial={{ y: 100 }}
                   animate={{ y: 0 }}
-                  className="z-10 flex h-full w-[400px] flex-col items-center justify-center rounded-2xl  text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[425px] xl:w-[500px] 2xl:w-[600px] lg:shadow-2xl"
+                  className="z-10 flex h-full w-[400px] flex-col items-center text-lg lg:text-xl justify-center rounded-2xl  text-stone-900 md:w-[400px] xl:absolute xl:top-20 xl:left-20  xl:mt-0 xl:h-auto lg:w-[425px] 2xl:w-[500px]"
                 >
                   <animated.div
                     style={{
                       marginTop:
-                        windowSize.width >= 1024 ? 0 : -windowSize.height / 2.2,
+                        windowSize.width >= 1280 ? 0 : -windowSize.height / 2.2,
                       x,
                       rotate,
                       scale,
@@ -430,7 +430,7 @@ useEffect(() => {
                         <div className="absolute bottom-0  flex h-3/4 w-full  items-center rounded-2xl bg-gradient-to-t from-stone-900"></div>
                         <div className="absolute bottom-5  flex w-full flex-col justify-start p-4 text-left text-white">
                           <p className="gap-2 align-middle">
-                            <b className="text-lg font-bold">{datum.name}</b>
+                            <b className="font-bold">{datum.name}</b>
                             &nbsp;&nbsp;
                             <i className="font-light">{datum.price}</i>
                           </p>

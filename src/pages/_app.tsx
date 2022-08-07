@@ -7,7 +7,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
     <Head>
-    <title>Where should I eat? | whereshouldieat.app</title>
+    <title>Where Should I Eat? | whereshouldieat.app</title>
     <meta
       name='viewport'
       content='width=device-width, initial-scale=1'
