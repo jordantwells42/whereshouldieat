@@ -339,7 +339,7 @@ useEffect(() => {
             style={{ height: windowSize.height }}
             className="flex w-full items-center justify-center "
           >
-            {
+            {!toggle && 
               <Map
                 provider={tiler}
                 center={
