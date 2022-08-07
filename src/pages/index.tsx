@@ -493,14 +493,8 @@ useEffect(() => {
                     <p className="w-full font-semibold italic">
                         {datum.categories.map((c: any) => c.title).join(" | ")}
                       </p>
-                    {/* INFO */}
-                    <div className="m-3 w-full">
-                      
-                      <p>{datum.display_phone}</p>
-                      <p>{datum.location.display_address.join("\n")}</p>
-                    </div>
 
-                    {/* HOURS */}
+                      {/* HOURS */}
                     {datum.hours && <div className="m-3 w-full ">
                       {(() => {
                         const hoursString = datum.hours[0].open
@@ -525,6 +519,14 @@ useEffect(() => {
                         );
                       })()}
                     </div>}
+                    {/* INFO */}
+                    <div className="m-3 w-full">
+                      
+                      <p>{datum.display_phone}</p>
+                      <p>{datum.location.display_address.join("\n")}</p>
+                    </div>
+
+                    
                     
                     {/* BUTTONS */}
                     <div className="flex w-full items-center justify-between m-3">
