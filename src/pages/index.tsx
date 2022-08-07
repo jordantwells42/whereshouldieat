@@ -139,11 +139,7 @@ const Home: NextPage = () => {
             if (!windowSize || !windowSize.width) {
               return;
             }
-            const x = !down
-              ? 0
-              : windowSize.width < 500
-              ? mx * 1.5
-              : mx;
+            const x = !down ? 0 : windowSize.width < 500 ? mx * 1.5 : mx;
             const rotate = !down
               ? 0
               : windowSize.width < 500
@@ -327,7 +323,7 @@ useEffect(() => {
     );
   }
   //console.log(location, centerRef.current);
-  console.log(business, business && business.hours)
+  console.log(business, business && business.hours);
   return (
     <>
       <div
@@ -335,12 +331,13 @@ useEffect(() => {
         className="relative flex h-full w-full flex-col items-center justify-center bg-stone-700  font-main"
       >
         {/*TINDER*/}
-        <div className="relative flex h-full w-full flex-col items-center justify-center overflow-x-hidden">
+        <div className="relative flex h-full w-full flex-col items-center justify-center overflow-x-hidden overflow-y-hidden">
           <div
             style={{ height: windowSize.height }}
             className="flex w-full items-center justify-center "
           >
-            {<Map
+            {
+              <Map
                 provider={tiler}
                 center={
                   business
@@ -385,187 +382,192 @@ useEffect(() => {
           {!toggle && business ? (
             [business].map((datum: any, idx: number) => {
               return (
-                <animated.div
-                  style={{
-                    marginTop:
-                      windowSize.width >= 1024 ? 0 : -windowSize.height / 2.2,
-                    x,
-                    rotate,
-                    scale,
-                    touchAction: "pan-y",
-                  }}
-                  className="z-10 flex h-full w-[400px] flex-col items-center justify-start rounded-2xl bg-stone-50 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
+                <motion.div
                   key={datum.id}
-                  {...bind()}
+                  initial={{ y: 100 }}
+                  animate={{ y: 0 }}
+                  className="z-10 flex h-full w-[400px] flex-col items-center justify-center rounded-2xl  text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[425px] xl:w-[500px] 2xl:w-[600px] lg:shadow-2xl"
                 >
-                  
+                  <animated.div
+                    style={{
+                      marginTop:
+                        windowSize.width >= 1024 ? 0 : -windowSize.height / 2.2,
+                      x,
+                      rotate,
+                      scale,
+                      touchAction: "pan-y",
+                    }}
+                    className="w-full h-full bg-stone-50 flex items-center justify-start flex-col rounded-2xl"
+                    {...bind()}
+                  >
                     <div
                       className={`text-center text-xl font-bold text-stone-50 ${
-                        !datum.is_closed
-                          ? "bg-green-500"
-                          : "bg-red-500"
+                        !datum.is_closed ? "bg-green-500" : "bg-red-500"
                       } w-full rounded-t-2xl`}
                     >
                       {!datum.is_closed ? "OPEN" : "CLOSED"}
                     </div>
-                  
-                  {/* IMAGES */}
-                  <div className="flex w-5/6 flex-col items-center justify-start">
-                    <div className="relative m-4 mb-0 flex aspect-square w-full flex-col items-center justify-start">
-                      <Carousel
-                        swipeable={false}
-                        showThumbs={false}
-                        className="absolute bottom-0 aspect-square w-full"
-                      >
-                        {datum.photos.map((photo: string) => {
-                          return (
-                            <img
-                              className="aspect-square w-full rounded-2xl object-cover "
-                              key={photo}
-                              src={photo}
-                              alt={datum.name}
-                            />
-                          );
-                        })}
-                      </Carousel>
-                      <div className="absolute bottom-0  flex h-3/4 w-full  items-center rounded-2xl bg-gradient-to-t from-stone-900"></div>
-                      <div className="absolute bottom-5  flex w-full flex-col justify-start p-4 text-left text-white">
-                        <p className="gap-2 align-middle">
-                          <b className="text-lg font-bold">{datum.name}</b>
-                          &nbsp;&nbsp;
-                          <i className="font-light">{datum.price}</i>
-                        </p>
-                        <p className="">
-                          {results.find((result) => result.id === datum.id) &&
-                            results.find((result) => result.id === datum.id)
-                              .distance &&
-                            Math.round(
-                              (results.find((result) => result.id === datum.id)
-                                .distance /
-                                1609) *
-                                100
-                            ) / 100}{" "}
-                          miles away
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <div className="align-center flex h-8 w-full items-center justify-start gap-2">
-                            <StarRatings
-                              rating={datum.rating}
-                              starRatedColor="gold"
-                              starEmptyColor="black"
-                              starDimension={`${
-                                windowSize.width > 700 ? "20" : "20"
-                              }px`}
-                              numberOfStars={5}
-                              name="rating"
-                            />{" "}
-                            ({datum.review_count})
+
+                    {/* IMAGES */}
+                    <div className="flex w-5/6 flex-col items-center justify-start">
+                      <div className="relative m-4 mb-0 flex aspect-square w-full flex-col items-center justify-start">
+                        <Carousel
+                          swipeable={false}
+                          showThumbs={false}
+                          className="absolute bottom-0 aspect-square w-full"
+                        >
+                          {datum.photos.map((photo: string) => {
+                            return (
+                              <img
+                                className="aspect-square w-full rounded-2xl object-cover "
+                                key={photo}
+                                src={photo}
+                                alt={datum.name}
+                              />
+                            );
+                          })}
+                        </Carousel>
+                        <div className="absolute bottom-0  flex h-3/4 w-full  items-center rounded-2xl bg-gradient-to-t from-stone-900"></div>
+                        <div className="absolute bottom-5  flex w-full flex-col justify-start p-4 text-left text-white">
+                          <p className="gap-2 align-middle">
+                            <b className="text-lg font-bold">{datum.name}</b>
+                            &nbsp;&nbsp;
+                            <i className="font-light">{datum.price}</i>
+                          </p>
+                          <p className="">
+                            {results.find((result) => result.id === datum.id) &&
+                              results.find((result) => result.id === datum.id)
+                                .distance &&
+                              Math.round(
+                                (results.find(
+                                  (result) => result.id === datum.id
+                                ).distance /
+                                  1609) *
+                                  100
+                              ) / 100}{" "}
+                            miles away
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <div className="align-center flex h-8 w-full items-center justify-start gap-2">
+                              <StarRatings
+                                rating={datum.rating}
+                                starRatedColor="gold"
+                                starEmptyColor="black"
+                                starDimension={`${
+                                  windowSize.width > 700 ? "20" : "20"
+                                }px`}
+                                numberOfStars={5}
+                                name="rating"
+                              />{" "}
+                              ({datum.review_count})
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    {/* LINKS */}
-                    <div className="z-20 mb-4 flex w-full justify-center gap-4">
-                      <Link href={datum.url}>
-                        <a rel="noreferrer noopener" target="_blank">
-                          <img
-                            alt="yelp"
-                            className="h-8 rounded-lg"
-                            src={"yelp.svg"}
-                          />
-                        </a>
-                      </Link>
-                      <Link
-                        href={`https://www.google.com/maps/dir/${location.join(
-                          ","
-                        )}/${business.name.split(" ").join("+")}/@${
-                          business.coordinates.latitude
-                        },${business.coordinates.longitude},15z`}
-                      >
-                        <a rel="noreferrer noopener" target="_blank">
-                          <img
-                            alt="yelp"
-                            className="h-8 rounded-lg"
-                            src={"maps.svg"}
-                          />
-                        </a>
-                      </Link>
-                    </div>
-                    <p className="w-full font-semibold italic">
+                      {/* LINKS */}
+                      <div className="z-20 mb-4 flex w-full justify-center gap-4">
+                        <Link href={datum.url}>
+                          <a rel="noreferrer noopener" target="_blank">
+                            <img
+                              alt="yelp"
+                              className="h-8 rounded-lg"
+                              src={"yelp.svg"}
+                            />
+                          </a>
+                        </Link>
+                        <Link
+                          href={`https://www.google.com/maps/dir/${location.join(
+                            ","
+                          )}/${business.name.split(" ").join("+")}/@${
+                            business.coordinates.latitude
+                          },${business.coordinates.longitude},15z`}
+                        >
+                          <a rel="noreferrer noopener" target="_blank">
+                            <img
+                              alt="yelp"
+                              className="h-8 rounded-lg"
+                              src={"maps.svg"}
+                            />
+                          </a>
+                        </Link>
+                      </div>
+                      <p className="w-full font-semibold italic">
                         {datum.categories.map((c: any) => c.title).join(" | ")}
                       </p>
 
                       {/* HOURS */}
-                    {datum.hours && <div className="m-3 w-full ">
-                      {(() => {
-                        const hoursString = datum.hours[0].open
-                          .filter((e: any) => e.day === day)
-                          .map(
-                            (hour: any) =>
-                              `${
-                                hour.start.slice(0, -2) +
-                                ":" +
-                                hour.start.slice(-2)
-                              } to ${
-                                hour.end.slice(0, -2) + ":" + hour.end.slice(-2)
-                              } `
-                          )
-                          .join("and ");
-                        return (
-                          <p>
-                            {hoursString
-                              ? "Open from " + hoursString + " today"
-                              : "Closed today"}
-                          </p>
-                        );
-                      })()}
-                    </div>}
-                    {/* INFO */}
-                    <div className="m-3 w-full">
-                      
-                      <p>{datum.display_phone}</p>
-                      <p>{datum.location.display_address.join("\n")}</p>
-                    </div>
+                      {datum.hours && (
+                        <div className="m-3 w-full ">
+                          {(() => {
+                            const hoursString = datum.hours[0].open
+                              .filter((e: any) => e.day === day)
+                              .map(
+                                (hour: any) =>
+                                  `${
+                                    hour.start.slice(0, -2) +
+                                    ":" +
+                                    hour.start.slice(-2)
+                                  } to ${
+                                    hour.end.slice(0, -2) +
+                                    ":" +
+                                    hour.end.slice(-2)
+                                  } `
+                              )
+                              .join("and ");
+                            return (
+                              <p>
+                                {hoursString
+                                  ? "Open from " + hoursString + " today"
+                                  : "Closed today"}
+                              </p>
+                            );
+                          })()}
+                        </div>
+                      )}
+                      {/* INFO */}
+                      <div className="m-3 w-full">
+                        <p>{datum.display_phone}</p>
+                        <p>{datum.location.display_address.join("\n")}</p>
+                      </div>
 
-                    
-                    
-                    {/* BUTTONS */}
-                    <div className="flex w-full items-center justify-between m-3">
-                      <button onClick={swipeLeft}>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-12 w-12"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                      <button onClick={swipeRight}>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-12 w-12"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="red"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                          />
-                        </svg>
-                      </button>
+                      {/* BUTTONS */}
+                      <div className="m-3 flex w-full items-center justify-between">
+                        <button onClick={swipeLeft}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-12 w-12"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                        <button onClick={swipeRight}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-12 w-12"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="red"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </animated.div>
+                  </animated.div>
+                </motion.div>
               );
             })
           ) : toggle ? (

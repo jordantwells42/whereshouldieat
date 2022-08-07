@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { motion } from 'framer-motion';
+
 function useWindowSize() {
   // Initialize state with undefined width/height so server and client renders match
   // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
@@ -37,7 +39,7 @@ export default function Modal({
 }) {
   const windowSize = useWindowSize();
   return (
-    <div
+    <motion.div
       style={{
         display: toggle ? "block" : "none",
         height:
@@ -50,6 +52,6 @@ export default function Modal({
       <div className="relative flex h-full w-full flex-col items-center justify-start text-lg">
         {children}
       </div>
-    </div>
+    </motion.div>
   );
 }
