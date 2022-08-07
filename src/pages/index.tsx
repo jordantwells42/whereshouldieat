@@ -15,6 +15,9 @@ import FoodIcons from "../components/FoodIcons";
 import StarRatings from "react-star-ratings";
 import Link from "next/link";
 import Modal from "../components/Modal";
+import { stringify } from "querystring";
+
+const day = (new Date().getDay() + 6) % 7;
 
 function useQueryState(
   name: string,
@@ -97,10 +100,6 @@ const Home: NextPage = () => {
   const maxZoom = 14;
 
   const windowSize = useWindowSize();
-
-  const [prevX, setPrevX] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [initX, setInitX] = useState(0);
   const [toggle, setToggle] = useQueryState("toggle", true);
   const [tab, setTab] = useQueryState("tab", 0);
   const [foodQuery, setFoodQuery] = useQueryState("food", "", (val) =>
@@ -110,7 +109,6 @@ const Home: NextPage = () => {
   const [resultIds, setResultIds] = useState<string[]>([]);
   const [business, setBusiness] = useState<Result>(undefined);
   const router = useRouter();
-  const [firstLoad, setFirstLoad] = useState(true);
   const centerRef = useRef<[number, number]>([40.7812, -73.9665]);
   const zoomRef = useRef<number>(maxZoom);
   const [location, setLocation] = useQueryState(
@@ -118,7 +116,6 @@ const Home: NextPage = () => {
     [40.7812, -73.9665]
   );
   const [locationQuery, setLocationQuery] = useState("");
-  const [dprs, setDprs] = useState<number>(1);
 
   const [{ x, rotate, scale }, api] = useSpring(() => ({
     x: 0,
@@ -148,7 +145,6 @@ const Home: NextPage = () => {
               ? mx / 20
               : mx / 50;
             const scale = down ? 1.05 : 1;
-            setPrevX(x);
             return {
               x,
               rotate,
@@ -318,7 +314,7 @@ useEffect(() => {
 
   function swipeRight() {
     router.push(
-      `https://www.google.com/maps/dir/${location.join(",")}/${business.name
+      `https://www.google.com/maps/search/${business.name
         .split(" ")
         .join("+")}/@${business.coordinates.latitude},${
         business.coordinates.longitude
@@ -393,11 +389,29 @@ useEffect(() => {
                     scale,
                     touchAction: "pan-y",
                   }}
-                  className="z-10 flex h-full w-[400px] flex-col items-center justify-start rounded-2xl bg-stone-50 p-2 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
+                  className="z-10 flex h-full w-[400px] flex-col items-center justify-start rounded-2xl bg-stone-50 text-stone-900 md:w-[400px] lg:absolute lg:top-20 lg:left-20  lg:mt-0 lg:h-screen lg:w-[400px]"
                   key={datum.id}
                   {...bind()}
                 >
+                  {datum.hours && datum.hours[0] ? (
+                    <div
+                      className={`text-center text-xl font-bold text-white ${
+                        datum.hours[0].is_open_now ? "bg-green-500" : "bg-red-500"
+                      } w-full rounded-t-2xl`}
+                    >
+                      {datum.hours[0].is_open_now ? "OPEN" : "CLOSED"}
+                    </div>
+                  ) : (
+                    <div
+                      className={`text-center text-xl font-bold text-white ${
+                        datum.hours.is_open_now ? "bg-green-500" : "bg-red-500"
+                      } w-full rounded-t-2xl`}
+                    >
+                      {datum.hours.is_open_now ? "OPEN" : "CLOSED"}
+                    </div>
+                  )}
                   <div className="flex w-5/6 flex-col items-center justify-start">
+                    {datum.hours.is_open_now}
                     <div className="relative m-4 mb-0 flex aspect-square w-full flex-col items-center justify-start">
                       <Carousel
                         showThumbs={false}
@@ -422,10 +436,11 @@ useEffect(() => {
                           <i className="font-light">{datum.price}</i>
                         </p>
                         <p className="">
-                          {results[results.length - resultIds.length]
-                            .distance &&
+                          {results.find((result) => result.id === datum.id) &&
+                            results.find((result) => result.id === datum.id)
+                              .distance &&
                             Math.round(
-                              (results[results.length - resultIds.length]
+                              (results.find((result) => result.id === datum.id)
                                 .distance /
                                 1609) *
                                 100
@@ -449,6 +464,7 @@ useEffect(() => {
                         </div>
                       </div>
                     </div>
+
                     <div className="z-20 mb-4 flex w-full justify-center gap-4">
                       <Link href={datum.url}>
                         <a rel="noreferrer noopener" target="_blank">
@@ -475,12 +491,29 @@ useEffect(() => {
                         </a>
                       </Link>
                     </div>
-                    <div className="m-5 w-full">
+
+                    <div className="m-3 w-full">
                       <p className="italic">
                         {datum.categories.map((c: any) => c.title).join(" | ")}
                       </p>
                       <p>{datum.display_phone}</p>
                       <p>{datum.location.display_address.join("\n")}</p>
+                    </div>
+
+                    <div className="m-3 w-full">
+                      Today&apos;s hours:&nbsp;
+                      {datum.hours[0].open
+                        .filter((e: any) => e.day === day)
+                        .map(
+                          (hour: any) =>
+                            `${
+                              hour.start.slice(0, -2) +
+                              ":" +
+                              hour.start.slice(-2)
+                            } - ${
+                              hour.end.slice(0, -2) + ":" + hour.end.slice(-2)
+                            } `
+                        )}
                     </div>
 
                     <div className="flex w-full items-center justify-between ">
@@ -641,7 +674,7 @@ useEffect(() => {
                     ]}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        setTab(0), setToggle(false);
+                        setToggle(false);
                       }
                     }}
                   />
@@ -667,7 +700,7 @@ useEffect(() => {
                 </button>
                 <button
                   className="absolute bottom-5 right-5 h-1/4"
-                  onClick={() => (setTab(0), setToggle(false))}
+                  onClick={() => (search("", foodQuery), setToggle(false))}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
