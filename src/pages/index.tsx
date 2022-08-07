@@ -20,6 +20,19 @@ import Footer from "../components/Footer";
 
 const day = (new Date().getDay() + 6) % 7;
 
+const starDict : any ={
+  0: "large_0.png",
+  1: "large_1.png",
+  1.5: "large_1_half.png",
+  2: "large_2.png",
+  2.5: "large_2_half.png",
+  3: "large_3.png",
+  3.5: "large_3_half.png",
+  4: "large_4.png",
+  4.5: "large_4_half.png",
+  5: "large_5.png"
+}
+
 function useQueryState(
   name: string,
   defaultValue: any,
@@ -450,16 +463,7 @@ useEffect(() => {
                           </p>
                           <div className="flex items-center justify-between">
                             <div className="align-center flex h-8 w-full items-center justify-start gap-2">
-                              <StarRatings
-                                rating={datum.rating}
-                                starRatedColor="gold"
-                                starEmptyColor="black"
-                                starDimension={`${
-                                  windowSize.width > 700 ? "20" : "20"
-                                }px`}
-                                numberOfStars={5}
-                                name="rating"
-                              />{" "}
+                              <img src={starDict[datum.rating]} alt="stars" />
                               ({datum.review_count})
                             </div>
                           </div>
