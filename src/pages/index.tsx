@@ -414,13 +414,13 @@ useEffect(() => {
                     className="w-full h-full bg-stone-50 flex items-center justify-start flex-col rounded-2xl"
                     {...bind()}
                   >
-                    <div
+                    {(datum.hours && datum.hours[0]) ? <div
                       className={`text-center text-xl font-bold text-stone-50 ${
                         datum.hours[0].is_open_now ? "bg-green-500" : "bg-red-500"
                       } w-full rounded-t-2xl`}
                     >
                       {datum.hours[0].is_open_now ? "OPEN" : "CLOSED"}
-                    </div>
+                    </div> : <div className="p-2"></div>}
 
                     {/* IMAGES */}
                     <div className="flex w-5/6 flex-col items-center justify-start">
