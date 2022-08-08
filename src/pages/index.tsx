@@ -416,10 +416,10 @@ useEffect(() => {
                   >
                     <div
                       className={`text-center text-xl font-bold text-stone-50 ${
-                        !datum.is_closed ? "bg-green-500" : "bg-red-500"
+                        datum.hours[0].is_open_now ? "bg-green-500" : "bg-red-500"
                       } w-full rounded-t-2xl`}
                     >
-                      {!datum.is_closed ? "OPEN" : "CLOSED"}
+                      {datum.hours[0].is_open_now ? "OPEN" : "CLOSED"}
                     </div>
 
                     {/* IMAGES */}
