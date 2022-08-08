@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       name='description'
       content="Put in where you are and what you're craving, and we'll tell you where to eat."
     />
-    <meta property='og:title' content='Where should I eat? | whereshouldieat.app' key='title' />
+    <meta property='og:title' content='Where Should I Eat? | whereshouldieat.app' key='title' />
     <meta
       property='og:image'
       content={
@@ -31,7 +31,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <meta name='twitter:card' content='summary_large_image'></meta>
     <meta name='twitter:site' content='@jordantwells42' />
     <meta name='twitter:creator' content='@jordantwells42' />
-    <meta name='twitter:title' content='Where should I eat? | whereshouldieat.app' />
+    <meta name='twitter:title' content='Where Should I Eat? | whereshouldieat.app' />
     <meta
       name='twitter:description'
       content="Put in where you are and what you're craving, and we'll tell you where to eat."
