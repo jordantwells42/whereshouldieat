@@ -73,7 +73,7 @@ function useQueryState(
     console.log("SETTING STATE OF ", name, "to", qvalue);
     const query = new URLSearchParams(window.location.search);
     query.set(name, JSON.stringify(qvalue) || "");
-    router.push(`?${query.toString()}`);
+    router.push(`?${query.toString()}`, undefined, {shallow: true, scroll: false});
     setQueryValue(qvalue);
   }
 
