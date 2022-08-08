@@ -441,7 +441,7 @@ useEffect(() => {
                             );
                           })}
                         </Carousel>
-                        <div className="absolute bottom-0  flex h-3/4 w-full  items-center rounded-2xl bg-gradient-to-t from-stone-900"></div>
+                        <div className="absolute bottom-0  flex h-2/3 w-full  items-center rounded-2xl bg-gradient-to-t from-stone-800"></div>
                         <div className="absolute bottom-5  flex w-full flex-col justify-start p-4 text-left text-white">
                           <p className="gap-2 align-middle">
                             <b className="font-bold">{datum.name}</b>
@@ -496,10 +496,10 @@ useEffect(() => {
                           </a>
                         </Link>
                       </div>
-                      <p className="w-full font-semibold italic">
-                        {datum.categories.map((c: any) => c.title).join(" | ")}
+                      <p className="w-full font-semibold">
+                      {datum.categories.map((c: any) => c.title).join(", ")}
                       </p>
-
+                      <p className="w-full text-left capitalize">{datum.transactions.join(" | ")}</p>
                       {/* HOURS */}
                       {datum.hours && (
                         <div className="m-3 w-full ">
@@ -533,7 +533,7 @@ useEffect(() => {
                       <div className="m-3 w-full">
                         <p>{datum.display_phone}</p>
                         <p>{datum.location.display_address.join("\n")}</p>
-                        <p className="capitalize">{datum.transactions.join(" | ")}</p>
+                        
                       </div>
 
                       {/* BUTTONS */}
