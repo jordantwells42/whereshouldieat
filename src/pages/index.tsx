@@ -12,11 +12,11 @@ import { useSpring, animated, config } from "react-spring";
 import { AnimatePresence, m, motion } from "framer-motion";
 import { DebounceInput } from "react-debounce-input";
 import FoodIcons from "../components/FoodIcons";
-import StarRatings from "react-star-ratings";
 import Link from "next/link";
 import Modal from "../components/Modal";
-import { stringify } from "querystring";
 import Footer from "../components/Footer";
+import useWindowSize from "../utils/useWindowSize";
+import Swipeable from "../components/Swipeable";
 
 const day = (new Date().getDay() + 6) % 7;
 
@@ -84,28 +84,7 @@ function tiler(x: number, y: number, z: number, dpr?: number) {
   return `https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png`;
 }
 
-function useWindowSize() {
-  const [windowSize, setWindowSize] = useState({
-    width: 1080,
-    height: 720,
-  });
 
-  useEffect(() => {
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-
-    window.addEventListener("resize", handleResize);
-
-    handleResize();
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  return windowSize;
-}
 
 type Result = any | null;
 type Results = Result[];
@@ -122,6 +101,7 @@ const Home: NextPage = () => {
   const [results, setResults] = useState<Results>([]);
   const [resultIds, setResultIds] = useState<string[]>([]);
   const [business, setBusiness] = useState<Result>(undefined);
+  const [nextBusiness, setNextBusiness] = useState<Result>(undefined)
   const router = useRouter();
   const centerRef = useRef<[number, number]>([40.7812, -73.9665]);
   const zoomRef = useRef<number>(maxZoom);
@@ -130,92 +110,6 @@ const Home: NextPage = () => {
     [40.7812, -73.9665]
   );
   const [locationQuery, setLocationQuery] = useState("");
-
-  const [{ x, rotate, scale }, api] = useSpring(() => ({
-    x: 0,
-    rotate: 0,
-    scale: 1,
-  }));
-
-  const bind = useGesture(
-    {
-      onDrag:
-        // @ts-ignore
-        ({ down, movement: [mx], direction: [dx], velocity: [vx] }) => {
-          if (!windowSize || !windowSize.width) {
-            return;
-          }
-          const trigger =
-            Math.abs(mx) > windowSize.width / (windowSize.width > 700 ? 6 : 2);
-          // @ts-ignore
-          api.start(() => {
-            if (!windowSize || !windowSize.width) {
-              return;
-            }
-            const x = !down ? 0 : windowSize.width < 500 ? mx * 1.5 : mx;
-            const rotate = !down
-              ? 0
-              : windowSize.width < 500
-              ? mx / 20
-              : mx / 50;
-            const scale = down ? 1.05 : 1;
-            return {
-              x,
-              rotate,
-              scale,
-              config: config.wobbly,
-            };
-          });
-        },
-
-      onDragEnd: ({
-        down,
-        // @ts-ignore
-        movement: [mx],
-        // @ts-ignore
-        direction: [dx],
-        // @ts-ignore
-        velocity: [vx],
-      }) => {
-        if (!windowSize || !windowSize.width) {
-          return;
-        }
-        const trigger =
-          Math.abs(mx) > windowSize.width / (windowSize.width > 700 ? 6 : 2);
-        // @ts-ignore
-        api.start(() => {
-          function handleTrigger() {
-            if (mx > 0) {
-              console.log("Swipe Right");
-              swipeRight();
-            } else {
-              console.log("Swipe Left");
-              swipeLeft();
-            }
-          }
-
-          if (trigger) {
-            handleTrigger();
-          }
-
-          return {
-            x: 0,
-            rotate: 0,
-            scale: 1,
-            config: config.gentle,
-          };
-        });
-      },
-    },
-    {
-      drag: {
-        filterTaps: true,
-        preventDefault: true,
-        //preventScroll: true,
-        axis: "x",
-      },
-    }
-  );
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -236,17 +130,7 @@ const Home: NextPage = () => {
       search([40.7812, -73.9665].join(","), "");
     }
   }, []);
-  /*
-useEffect(() => {
-  if (firstLoad) {
-    setFirstLoad(false);
-    return;
-  }
-  if (location) {
-    centerRef.current = location;
-    search("", foodQuery)
-  }
-}, [location])*/
+  
 
   function search(locationStr: string, foodStr: string) {
     fetch(
@@ -260,8 +144,8 @@ useEffect(() => {
       .then((res) => {
         setResultIds(res.businesses.map((r: Result) => r.id));
         setResults(res.businesses.reverse());
-        newBusiness(res.businesses.at(-1).id);
-
+        initBusinesses(res.businesses.at(-1).id, res.businesses.at(-2).id)
+      
         if (locationStr) {
           console.log("AYO", locationStr);
           setLocation([
@@ -309,20 +193,57 @@ useEffect(() => {
         return res.json();
       })
       .then((res) => {
-        setBusiness(res);
+        setBusiness(nextBusiness);
+        setNextBusiness(res)
       });
   }
 
+  function selectBusiness(id: string | undefined) {
+    fetch(`/api/business?id=${id}`)
+    .then((res) => {
+      return res.json();
+    })
+    .then((res) => {
+      setBusiness(res);
+    });
+  }
+
+  function initBusinesses(id1: string, id2: string){
+    fetch(`/api/business?id=${id1}`)
+      .then((res) => {
+        return res.json()
+      })
+      .then((res) => {
+        setBusiness(res)
+      })
+
+      fetch(`/api/business?id=${id2}`)
+      .then((res) => {
+        return res.json()
+      })
+      .then((res) => {
+        setNextBusiness(res)
+      })
+  }
+
   function swipeLeft() {
-    if (resultIds.length > 1) {
+    if (resultIds.length > 2) {
       setResultIds((p) => {
-        const newP = p.filter((id) => id !== business.id);
-        newBusiness(newP[0]);
+        const newId = p.filter((id) => (id !== business.id && id !== nextBusiness.id))[0];
+        const newP = p.filter((id) => (id !== business.id))
+        newBusiness(newId);
         return newP;
       });
+    } else if (resultIds.length == 2) {
+      setResultIds((p) => {
+        const newP = p.filter((id) => id !== business.id)
+        return newP
+      })
+      setBusiness(nextBusiness)
+      setNextBusiness(undefined)
     } else {
       setBusiness(undefined);
-      setResultIds([]);
+      setNextBusiness(undefined)
     }
   }
 
@@ -335,8 +256,7 @@ useEffect(() => {
       },15z`
     );
   }
-  //console.log(location, centerRef.current);
-  console.log(business, business && business.hours);
+
   return (
     <>
       <div
@@ -402,18 +322,7 @@ useEffect(() => {
                   ref={ref}
                   className="z-10 flex h-full w-[400px] flex-col items-center text-lg md:text-lg lg:text-xl justify-center rounded-2xl  text-stone-900 md:w-[400px] lg:absolute lg:top-10 lg:left-20  lg:mt-0 lg:h-auto  lg:w-[425px] xl:w-[500px] 2xl:w-[600px]"
                 >
-                  <animated.div
-                    style={{
-                      marginTop:
-                        windowSize.width >= 1024 ? 0 : -windowSize.height / 2.2,
-                      x,
-                      rotate,
-                      scale,
-                      touchAction: "pan-y",
-                    }}
-                    className="w-full h-full bg-stone-50 flex items-center justify-start flex-col rounded-2xl"
-                    {...bind()}
-                  >
+                  <Swipeable onSwipeLeft={swipeLeft} onSwipeRight={swipeRight}>
                     {(datum.hours && datum.hours[0]) ? <div
                       className={`text-center text-xl font-bold text-stone-50 ${
                         datum.hours[0].is_open_now ? "bg-green-500" : "bg-red-500"
@@ -572,7 +481,7 @@ useEffect(() => {
                         </button>
                       </div>
                     </div>
-                  </animated.div>
+                    </Swipeable>
                 </motion.div>
               );
             })
@@ -640,7 +549,7 @@ useEffect(() => {
                   debounceTimeout={300}
                   onChange={(e) => [
                     setLocationQuery(e.target.value),
-                    search(e.target.value, foodQuery),
+                    //search(e.target.value, foodQuery),
                   ]}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
